@@ -1,0 +1,48 @@
+# ---------------------------------------------------------------------------
+# 101 Grill - what travels in git
+#
+# A WordPress install is mostly other people's code: core, plugins, uploads,
+# backups. Only this project's own work is tracked, so the repo stays small
+# and nothing secret or regenerable is published.
+#
+# Everything is ignored by default and the tracked set is opted back in.
+# That is deliberate: a blacklist lets a new 85MB folder of photo masters
+# slip in unnoticed, a whitelist cannot.
+# ---------------------------------------------------------------------------
+
+# Ignore everything...
+/*
+
+# ...except this file and the project notes.
+!.gitignore
+!README.md
+
+# The child theme is the deliverable.
+!wp-content/
+wp-content/*
+!wp-content/themes/
+wp-content/themes/*
+!wp-content/themes/babaYaga/
+
+# ...but not the photography masters (~85MB of 3000px originals) or the
+# superseded source PDF. The served, compressed copies under assets/doc and
+# assets/img are tracked.
+wp-content/themes/babaYaga/assets/js/images/
+wp-content/themes/babaYaga/assets/js/*.pdf
+
+# Custom must-use plugins. These read their secrets from wp-config
+# constants and never contain one themselves.
+!wp-content/mu-plugins/
+wp-content/mu-plugins/*
+!wp-content/mu-plugins/0-tavern-local-env.php
+!wp-content/mu-plugins/tavern-local-login.php
+
+# Never, under any circumstances. All of these are already covered by the
+# rule at the top; they are spelled out so the intent survives an edit.
+wp-config.php
+LOCAL-LOGIN.txt
+*.log
+wp-content/updraft/
+wp-content/uploads/
+/Documents/
+/assets/

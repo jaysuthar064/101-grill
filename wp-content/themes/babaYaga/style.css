@@ -1,0 +1,2178 @@
+/*
+Theme Name: BabaYaga Child
+Theme URI: https://tavern101agoura.launchpreview.live/
+Description: Child theme for Hello Elementor built for Tavern 101 Agoura.
+Author: devBaba
+Author URI: https://tavern101agoura.launchpreview.live/
+Template: hello-elementor
+Version: 2.0.0
+Text Domain: babayaga-child
+License: GNU General Public License v3 or later
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
+*/
+
+/* ==========================================================================
+   TAVERN 101 - MODERN DESIGN LAYER
+   --------------------------------------------------------------------------
+   Presentation only. No markup, content, plugin or template is changed here.
+
+   Direction
+   ---------
+   Light and airy, modern minimal. One grotesk typeface, very large headings,
+   heavy negative space, no ornament, crisp full-colour photography. The
+   novelty western artwork (stick-figure canvas animations, dingbats, corner
+   brackets, the illustrated hero badge) is suppressed - it was the single
+   biggest reason the site read as a children's brand.
+
+   How it works
+   ------------
+   The build is variable-driven on two levels:
+     1. Elementor kit #6 exposes  --e-global-color-*  /  --e-global-typography-*
+     2. The Customizer CSS exposes the t101 menu system's  --t-*  variables
+   Both are declared on :root / .elementor-kit-6. Re-declaring them on `body`
+   wins by proximity in the cascade, so the site re-themes without !important.
+
+   Two cascade traps worth knowing
+   -------------------------------
+     - wp-custom-css prints AFTER this file, so every .t101-* override needs a
+       `body ` prefix or it loses at equal specificity.
+     - Elementor mirrors border colour into a --border-color custom property
+       that nested containers inherit and paint their own borders from.
+
+   Contents
+   --------
+     1.  Design tokens          10. Hero
+     2.  Elementor global remap 11. Menu component (t101)
+     3.  t101 component remap   12. Gallery and carousel
+     4.  Base and page surface  13. Tabs
+     5.  Typography             14. Forms
+     6.  Header and navigation  15. Footer
+     7.  Buttons                16. Motion
+     8.  Containers and cards   17. Responsive
+     9.  Images and media       18. Accessibility
+                                19. Ornament suppression
+                                20+ Generated per-element sweeps
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. DESIGN TOKENS
+   ========================================================================== */
+
+body {
+  /* Surfaces - bone paper and clean white */
+  --t101-bg:        #F7F6F3;
+  --t101-surface:   #FFFFFF;
+  --t101-surface-2: #F1EFEB;
+  --t101-surface-3: #E9E6E1;
+
+  /* Ink */
+  --t101-ink:       #141414;
+  --t101-body:      #4A4744;
+  --t101-muted:     #78736E;
+  --t101-faint:     #A8A29B;
+
+  /* A single restrained accent - ember, used sparingly */
+  --t101-accent:    #A9482C;
+  --t101-accent-sd: #8E3B23;
+
+  /* Lines and shadow - very soft, modern */
+  --t101-line:        rgba(20, 20, 20, .10);
+  --t101-line-strong: rgba(20, 20, 20, .18);
+  --t101-shadow-sm:   0 1px 2px rgba(20, 20, 20, .04);
+  --t101-shadow:      0 4px 24px rgba(20, 20, 20, .06);
+  --t101-shadow-lg:   0 18px 50px rgba(20, 20, 20, .10);
+
+  /* Shape and motion */
+  --t101-radius:      16px;
+  --t101-radius-sm:   12px;
+  --t101-radius-pill: 999px;
+  --t101-ease:        cubic-bezier(.22, .61, .36, 1);
+
+  /* One family, used everywhere */
+  --t101-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Helvetica, Arial, sans-serif;
+
+  /* Rhythm - generous */
+  --t101-section-y: clamp(56px, 5.5vw, 96px);
+}
+
+
+/* ==========================================================================
+   2. ELEMENTOR GLOBAL REMAP
+   ========================================================================== */
+
+body.elementor-kit-6 {
+  --e-global-color-primary:   var(--t101-ink);
+  --e-global-color-secondary: var(--t101-muted);
+  --e-global-color-text:      var(--t101-body);
+  --e-global-color-accent:    var(--t101-accent);
+
+  --e-global-typography-primary-font-family:   "Inter";
+  --e-global-typography-primary-font-weight:   600;
+  --e-global-typography-secondary-font-family: "Inter";
+  --e-global-typography-secondary-font-weight: 400;
+  --e-global-typography-text-font-family:      "Inter";
+  --e-global-typography-text-font-weight:      400;
+  --e-global-typography-accent-font-family:    "Inter";
+  --e-global-typography-accent-font-weight:    500;
+}
+
+
+/* ==========================================================================
+   3. t101 COMPONENT REMAP
+   The menu card's own variables, moved from cream/tan to white/ink.
+   ========================================================================== */
+
+body {
+  --t-cream:     var(--t101-surface);
+  --t-cream2:    var(--t101-surface-2);
+  --t-cream3:    var(--t101-surface-3);
+  --t-ink:       var(--t101-ink);
+  --t-ink2:      var(--t101-body);
+  --t-tan:       var(--t101-muted);
+  --t-tan-light: var(--t101-accent);
+  --t-tan-pale:  var(--t101-surface-2);
+  /* .t101-item .t101-desc paints from --t-rust; the accent turned every
+     menu description red, so it maps to body ink instead. */
+  --t-rust:      var(--t101-body);
+}
+
+
+/* ==========================================================================
+   4. BASE AND PAGE SURFACE
+   ========================================================================== */
+
+html {
+  background-color: var(--t101-bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--t101-bg);
+  color: var(--t101-body);
+  font-family: var(--t101-sans);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.7;
+  letter-spacing: -.005em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+.site-main,
+.page-content,
+.elementor-location-single,
+.elementor-location-archive {
+  background-color: transparent;
+}
+
+.elementor-636 .elementor-element.elementor-element-a642b35,
+.elementor-99 .elementor-element.elementor-element-587e419a {
+  background-color: transparent;
+}
+
+::selection { background: var(--t101-ink); color: #FFFFFF; }
+
+
+/* ==========================================================================
+   5. TYPOGRAPHY
+   One grotesk. Large, tightly tracked headings; quiet, readable body.
+   ========================================================================== */
+
+h1, h2, h3, h4, h5, h6,
+.elementor-heading-title {
+  font-family: var(--t101-sans);
+  color: var(--t101-ink);
+  font-weight: 600;
+  /* 1.06 collides on multi-line headings that carry descenders */
+  line-height: 1.12;
+  letter-spacing: -.035em;
+}
+
+h1, h2, h3 { text-wrap: balance; }
+
+h1, .elementor-widget-heading h1.elementor-heading-title {
+  font-size: clamp(2.9rem, 6.4vw, 5.4rem);
+  letter-spacing: -.045em;
+}
+h2, .elementor-widget-heading h2.elementor-heading-title {
+  font-size: clamp(2.3rem, 4.8vw, 3.8rem);
+  letter-spacing: -.04em;
+}
+h3, .elementor-widget-heading h3.elementor-heading-title {
+  font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+  letter-spacing: -.03em;
+}
+h4, .elementor-widget-heading h4.elementor-heading-title {
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  letter-spacing: -.02em;
+}
+
+p, .elementor-widget-text-editor {
+  font-family: var(--t101-sans);
+  font-weight: 400;
+  font-size: clamp(1rem, 1.15vw, 1.075rem);
+  line-height: 1.75;
+}
+
+/* Colour is set on the widget wrapper, never on the <p> itself.
+   Elementor colours text widgets by putting `color` on the wrapper and
+   letting the paragraph inherit it. A rule on `p` would be a DIRECT
+   declaration, which beats an inherited value no matter how specific the
+   ancestor is - that is what repainted the white hero copy on the contact
+   page dark grey against a dark photograph. Setting it on the wrapper keeps
+   Elementor able to override it per section. */
+.elementor-widget-text-editor { color: var(--t101-body); }
+p { color: inherit; }
+
+.elementor-widget-text-editor p:not(:last-child) { margin-bottom: 1.1em; }
+
+strong, b { color: var(--t101-ink); font-weight: 600; }
+
+a { color: var(--t101-ink); text-decoration: none; transition: color .2s var(--t101-ease); }
+a:hover { color: var(--t101-accent); }
+
+/* Eyebrow / kicker lines */
+.elementor-widget-heading h5.elementor-heading-title,
+.elementor-widget-heading h6.elementor-heading-title {
+  font-family: var(--t101-sans);
+  font-weight: 500;
+  font-size: .75rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--t101-accent);
+  line-height: 1.5;
+}
+
+
+/* ==========================================================================
+   6. HEADER AND NAVIGATION
+   ========================================================================== */
+
+.elementor-location-header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background-color: transparent;
+  transition: background-color .35s var(--t101-ease),
+              box-shadow .35s var(--t101-ease);
+}
+
+.elementor-14 .elementor-element.elementor-element-f7cf130 {
+  background-color: transparent;
+  border-color: transparent;
+  transition: border-color .35s var(--t101-ease), padding .35s var(--t101-ease);
+  padding-block: 14px;
+}
+
+.t101-header-scrolled .elementor-location-header {
+  background-color: rgba(247, 246, 243, .97);
+  box-shadow: 0 1px 0 rgba(20, 20, 20, .07);
+}
+.t101-header-scrolled .elementor-14 .elementor-element.elementor-element-f7cf130 {
+  padding-block: 6px;
+}
+
+/* Nav links - small, medium weight, quiet */
+body .elementor-widget-nav-menu .elementor-nav-menu--main .elementor-item {
+  font-family: var(--t101-sans);
+  font-weight: 500;
+  font-size: .875rem;
+  letter-spacing: -.005em;
+  text-transform: none;
+  color: var(--t101-body);
+  padding: 8px 2px;
+  transition: color .2s var(--t101-ease);
+}
+
+body .elementor-widget-nav-menu .elementor-nav-menu--main .elementor-item:hover,
+body .elementor-widget-nav-menu .elementor-nav-menu--main .elementor-item:focus-visible,
+body .elementor-widget-nav-menu .elementor-nav-menu--main .elementor-item.elementor-item-active {
+  color: var(--t101-ink);
+}
+
+/* A small dot marks the current page - quieter than an underline */
+.elementor-nav-menu--main .elementor-item.elementor-item-active { position: relative; }
+.elementor-nav-menu--main .elementor-item.elementor-item-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--t101-accent);
+  transform: translateX(-50%);
+}
+
+.elementor-nav-menu--main .elementor-nav-menu > li { margin-inline: clamp(4px, .7vw, 12px); }
+
+/* Mobile dropdown */
+.elementor-nav-menu--dropdown {
+  background-color: rgba(255, 255, 255, .98) !important;
+  border-top: 1px solid var(--t101-line);
+}
+.elementor-nav-menu--dropdown .elementor-item {
+  color: var(--t101-ink) !important;
+  font-family: var(--t101-sans);
+  font-weight: 500;
+  font-size: 1rem;
+  letter-spacing: -.01em;
+  text-transform: none;
+  padding: 16px 24px !important;
+  border-bottom: 1px solid var(--t101-line);
+}
+.elementor-nav-menu--dropdown .elementor-item:hover,
+.elementor-nav-menu--dropdown .elementor-item.elementor-item-active {
+  background-color: var(--t101-surface-2) !important;
+  color: var(--t101-ink) !important;
+}
+
+/* Burger */
+.elementor-menu-toggle {
+  color: var(--t101-ink) !important;
+  background-color: transparent !important;
+  border: 1px solid var(--t101-line);
+  border-radius: var(--t101-radius-sm);
+  padding: 9px !important;
+  transition: border-color .2s var(--t101-ease);
+}
+.elementor-menu-toggle:hover { border-color: var(--t101-line-strong); }
+
+.elementor-location-header .elementor-social-icon,
+.elementor-location-header .elementor-icon {
+  color: var(--t101-muted);
+  transition: color .2s var(--t101-ease);
+}
+.elementor-location-header .elementor-social-icon:hover,
+.elementor-location-header .elementor-icon:hover { color: var(--t101-ink); }
+
+
+/* ==========================================================================
+   7. BUTTONS
+   Solid ink pill for primary, ember on hover.
+   ========================================================================== */
+
+.elementor-button,
+.elementor-button-link,
+a.elementor-button,
+button.elementor-button,
+.wp-block-button__link {
+  font-family: var(--t101-sans) !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  font-size: .9rem !important;
+  letter-spacing: -.005em !important;
+  text-transform: none !important;
+  line-height: 1 !important;
+  padding: 17px 32px !important;
+  border-radius: var(--t101-radius-pill) !important;
+  border: 1px solid var(--t101-ink) !important;
+  background-color: var(--t101-ink) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  transition: background-color .22s var(--t101-ease),
+              border-color .22s var(--t101-ease),
+              color .22s var(--t101-ease),
+              transform .22s var(--t101-ease);
+}
+
+.elementor-button:hover,
+.elementor-button:focus-visible,
+.wp-block-button__link:hover {
+  background-color: var(--t101-accent) !important;
+  border-color: var(--t101-accent) !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
+}
+
+.elementor-button:active { transform: translateY(0); }
+
+.elementor-button .elementor-button-icon { transition: transform .22s var(--t101-ease); }
+.elementor-button:hover .elementor-button-icon { transform: translateX(3px); }
+
+.elementor-location-header .elementor-button { padding: 13px 24px !important; }
+
+
+/* ==========================================================================
+   8. CONTAINERS AND CARDS
+   Air is the main design device here.
+   ========================================================================== */
+
+.e-con.e-parent {
+  padding-block: var(--t101-section-y);
+  position: relative;
+}
+
+.e-con.e-parent.vintageBanner { padding-block: 0; }
+
+.e-con-inner { gap: clamp(24px, 3.5vw, 56px); }
+
+.elementor-image-box-wrapper,
+.elementor-icon-box-wrapper {
+  border-radius: var(--t101-radius);
+  transition: transform .3s var(--t101-ease), box-shadow .3s var(--t101-ease);
+}
+
+.elementor-widget-image-box:hover .elementor-image-box-wrapper,
+.elementor-widget-icon-box:hover .elementor-icon-box-wrapper {
+  transform: translateY(-3px);
+  box-shadow: var(--t101-shadow);
+}
+
+.elementor-image-box-title,
+.elementor-icon-box-title { color: var(--t101-ink); }
+
+.elementor-divider-separator { border-color: var(--t101-line) !important; }
+
+
+/* ==========================================================================
+   9. IMAGES AND MEDIA
+   Crisp and full colour. No sepia, no vintage filters, no inversion.
+   ========================================================================== */
+
+.elementor-widget-image img,
+.elementor-widget-theme-post-featured-image img {
+  border-radius: var(--t101-radius);
+  display: block;
+}
+
+.elementor-widget-image figure,
+.elementor-widget-image .elementor-widget-container {
+  overflow: hidden;
+  border-radius: var(--t101-radius);
+}
+
+.elementor-widget-image img {
+  filter: none;
+  transition: transform .6s var(--t101-ease);
+}
+.elementor-widget-image:hover img { transform: scale(1.03); will-change: transform; }
+
+/* The logo is black line art and sits correctly on the light ground */
+.elementor-widget-theme-site-logo img { filter: none; border-radius: 0; }
+
+
+/* ==========================================================================
+   10. HERO
+   The illustrated badge banner is replaced with the venue photograph. The
+   original image element is hidden rather than deleted, so nothing is lost
+   and the change is reversible from this file alone.
+   ========================================================================== */
+
+.vintageBanner {
+  position: relative;
+  isolation: isolate;
+  min-height: min(76vh, 720px);
+  background-color: var(--t101-surface-3);
+  background-image:
+    linear-gradient(180deg, rgba(20, 20, 20, .10) 0%, rgba(20, 20, 20, 0) 34%, rgba(20, 20, 20, .14) 100%),
+    url("/wp-content/uploads/2026/09/101-grill-spread-hero.jpg");
+  background-size: cover, cover;
+  background-position: center 58%, center 58%;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Hide the cartoon badge illustration that used to be the hero */
+.vintageBanner .elementor-widget-image,
+.vintageBanner img { display: none; }
+
+
+/* ==========================================================================
+   11. MENU COMPONENT (t101)
+   Same structure, stripped of the vintage frame language.
+   ========================================================================== */
+
+body .t101-menu {
+  font-family: var(--t101-sans);
+  background: var(--t101-surface);
+  border-radius: var(--t101-radius);
+  box-shadow: var(--t101-shadow);
+  max-width: 1040px;
+}
+
+body .t101-border-outer { border: 1px solid var(--t101-line); border-radius: var(--t101-radius); }
+body .t101-border-inner {
+  border: 0;
+  margin: 0;
+  padding: clamp(32px, 5vw, 76px) clamp(22px, 5vw, 76px);
+}
+
+body .t101-header { border-bottom: 1px solid var(--t101-line); padding-bottom: 40px; }
+body .t101-header h1,
+body .t101-header h2 {
+  font-family: var(--t101-sans);
+  font-weight: 600;
+  letter-spacing: -.04em;
+  text-transform: none;
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  color: var(--t101-ink);
+}
+body .t101-header .t101-est {
+  font-family: var(--t101-sans);
+  letter-spacing: .14em;
+  color: var(--t101-accent);
+  font-weight: 500;
+}
+body .t101-header .t101-tagline {
+  font-family: var(--t101-sans);
+  font-style: normal;
+  letter-spacing: -.005em;
+  color: var(--t101-muted);
+  font-size: 1rem;
+}
+
+/* Category pills */
+body .t101-nav { gap: 8px; margin: 40px 0 52px; }
+body .t101-nav button {
+  font-family: var(--t101-sans);
+  font-weight: 500;
+  font-size: .8rem;
+  letter-spacing: -.005em;
+  text-transform: none;
+  color: var(--t101-body);
+  border: 1px solid var(--t101-line);
+  border-radius: var(--t101-radius-pill);
+  background: transparent;
+  padding: 10px 20px;
+  min-height: 42px;
+  transition: color .2s var(--t101-ease), border-color .2s var(--t101-ease),
+              background-color .2s var(--t101-ease);
+}
+body .t101-nav button:hover {
+  background: var(--t101-surface-2);
+  border-color: var(--t101-line-strong);
+  color: var(--t101-ink);
+}
+body .t101-nav button.active {
+  background: var(--t101-ink);
+  border-color: var(--t101-ink);
+  color: #FFFFFF;
+}
+
+body .t101-sec-head h2 {
+  font-family: var(--t101-sans);
+  font-weight: 600;
+  letter-spacing: -.04em;
+  text-transform: none;
+  color: var(--t101-ink);
+  font-size: clamp(1.9rem, 4vw, 2.8rem);
+}
+body .t101-sec-head .t101-sec-sub {
+  font-family: var(--t101-sans);
+  font-style: normal;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-size: .72rem;
+  color: var(--t101-accent);
+  opacity: 1;
+}
+
+/* Item cards */
+body .t101-grid { gap: 18px; }
+body .t101-item {
+  border: 1px solid var(--t101-line);
+  border-radius: var(--t101-radius-sm);
+  background: var(--t101-surface);
+  padding: 24px 26px;
+  transition: border-color .2s var(--t101-ease), box-shadow .2s var(--t101-ease);
+}
+body .t101-item:hover {
+  background: var(--t101-surface);
+  border-color: var(--t101-line-strong);
+  box-shadow: var(--t101-shadow);
+  transform: none;
+}
+body .t101-item::before { border-color: transparent !important; }
+
+body .t101-note,
+body .t101-sauce,
+body .t101-dessert,
+body .t101-drink-highlight {
+  background: var(--t101-surface-2);
+  border: 1px solid var(--t101-line);
+  border-radius: var(--t101-radius-sm);
+  color: var(--t101-body);
+  font-style: normal;
+}
+
+body .t101-sauce .t101-sname,
+body .t101-dessert .t101-dname { color: var(--t101-ink); }
+
+body .t101-kids-badge {
+  background: var(--t101-ink);
+  color: #FFFFFF;
+  border-radius: var(--t101-radius-pill);
+  padding: 7px 18px;
+  letter-spacing: .06em;
+}
+
+body .t101-addons,
+body .t101-plates-note {
+  border-color: var(--t101-line) !important;
+  border-radius: var(--t101-radius-sm);
+}
+
+body .t101-footer { border-top: 1px solid var(--t101-line); }
+
+
+/* ==========================================================================
+   12. GALLERY AND CAROUSEL
+   ========================================================================== */
+
+body .elementor-gallery-item {
+  border: 0;
+  border-radius: var(--t101-radius);
+  overflow: hidden;
+}
+body .elementor-gallery-item::before { display: none; }
+
+body .elementor-gallery-item__image,
+body .elementor-gallery-item img {
+  filter: none;
+  transition: transform .6s var(--t101-ease);
+}
+body .elementor-gallery-item:hover .elementor-gallery-item__image,
+body .elementor-gallery-item:hover img { transform: scale(1.04); }
+
+body .elementor-gallery-item__overlay {
+  background-color: rgba(20, 20, 20, .18) !important;
+  transition: background-color .3s var(--t101-ease);
+}
+body .elementor-gallery-item:hover .elementor-gallery-item__overlay {
+  background-color: rgba(20, 20, 20, 0) !important;
+}
+
+body .t101-carousel .e-n-carousel {
+  border: 0;
+  border-radius: var(--t101-radius);
+  overflow: hidden;
+}
+body .t101-carousel .e-n-carousel::before,
+body .t101-carousel .e-n-carousel::after { display: none; }
+body .t101-carousel .swiper-slide::before,
+body .t101-carousel .swiper-slide::after { display: none; }
+body .t101-carousel .swiper-slide > .e-con { filter: none; }
+
+body .t101-carousel .elementor-swiper-button {
+  background: rgba(255, 255, 255, .92) !important;
+  border: 1px solid var(--t101-line) !important;
+  border-radius: var(--t101-radius-pill);
+  box-shadow: var(--t101-shadow-sm);
+}
+body .t101-carousel .elementor-swiper-button::before { display: none; }
+body .t101-carousel .elementor-swiper-button svg { fill: var(--t101-ink) !important; }
+body .t101-carousel .elementor-swiper-button:hover { background: #FFFFFF !important; }
+
+body .t101-carousel .swiper-pagination-bullet {
+  background: var(--t101-line-strong);
+  border: 0;
+  border-radius: 50%;
+  transform: none;
+}
+body .t101-carousel .swiper-pagination-bullet-active {
+  background: var(--t101-ink);
+  transform: none;
+}
+
+
+/* ==========================================================================
+   13. TABS
+   ========================================================================== */
+
+body .e-n-tabs-heading { gap: 8px; padding: 28px 0; }
+
+body .e-n-tab-title {
+  font-family: var(--t101-sans) !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  font-size: .82rem !important;
+  letter-spacing: -.005em !important;
+  text-transform: none !important;
+  color: var(--t101-body) !important;
+  background: transparent !important;
+  border: 1px solid var(--t101-line) !important;
+  border-radius: var(--t101-radius-pill) !important;
+  padding: 11px 22px !important;
+  min-height: 42px;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  transition: color .2s var(--t101-ease), border-color .2s var(--t101-ease),
+              background-color .2s var(--t101-ease) !important;
+}
+
+body .e-n-tab-title::before,
+body .e-n-tab-title::after { display: none !important; }
+
+body .e-n-tab-title:hover {
+  background: var(--t101-surface-2) !important;
+  border-color: var(--t101-line-strong) !important;
+  color: var(--t101-ink) !important;
+  transform: none !important;
+}
+
+body .e-n-tab-title[aria-selected="true"],
+body .e-n-tab-title.e-active {
+  background: var(--t101-ink) !important;
+  border-color: var(--t101-ink) !important;
+  color: #FFFFFF !important;
+}
+
+
+/* ==========================================================================
+   14. FORMS
+   ========================================================================== */
+
+.elementor-field-group .elementor-field,
+input[type="text"], input[type="email"], input[type="tel"],
+input[type="url"], input[type="number"], input[type="date"],
+select, textarea {
+  background-color: var(--t101-surface) !important;
+  border: 1px solid var(--t101-line) !important;
+  border-radius: var(--t101-radius-sm) !important;
+  color: var(--t101-ink) !important;
+  font-family: var(--t101-sans) !important;
+  font-weight: 400;
+  font-size: 1rem !important;
+  padding: 15px 18px !important;
+  min-height: 52px;
+  transition: border-color .2s var(--t101-ease), box-shadow .2s var(--t101-ease);
+}
+
+textarea { min-height: 150px; }
+
+.elementor-field-group .elementor-field:focus,
+input:focus, select:focus, textarea:focus {
+  border-color: var(--t101-ink) !important;
+  box-shadow: 0 0 0 3px rgba(20, 20, 20, .08) !important;
+  outline: none;
+}
+
+::placeholder { color: var(--t101-faint) !important; opacity: 1; }
+
+.elementor-field-label {
+  font-family: var(--t101-sans) !important;
+  font-size: .8rem !important;
+  font-weight: 500;
+  letter-spacing: -.005em;
+  text-transform: none;
+  color: var(--t101-body) !important;
+  margin-bottom: 8px !important;
+}
+
+
+/* ==========================================================================
+   15. FOOTER
+   ========================================================================== */
+
+.elementor-location-footer {
+  background-color: var(--t101-surface);
+  border-top: 1px solid var(--t101-line);
+}
+.elementor-location-footer .elementor-heading-title { color: var(--t101-ink); }
+.elementor-location-footer p,
+.elementor-location-footer li { color: var(--t101-body); }
+.elementor-location-footer a { color: var(--t101-body); }
+.elementor-location-footer a:hover { color: var(--t101-ink); }
+.elementor-location-footer .elementor-social-icon {
+  background-color: transparent !important;
+  border: 1px solid var(--t101-line);
+  border-radius: var(--t101-radius-pill);
+  color: var(--t101-body) !important;
+  transition: border-color .2s var(--t101-ease), color .2s var(--t101-ease);
+}
+.elementor-location-footer .elementor-social-icon:hover {
+  border-color: var(--t101-line-strong);
+  color: var(--t101-ink) !important;
+}
+
+
+/* ==========================================================================
+   16. MOTION
+   Minimal: a short rise on scroll. Nothing decorative.
+   ========================================================================== */
+
+html { scroll-behavior: smooth; }
+
+.t101-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .6s var(--t101-ease), transform .6s var(--t101-ease);
+  will-change: opacity, transform;
+}
+.t101-reveal.is-visible { opacity: 1; transform: none; will-change: auto; }
+
+.t101-reveal[data-t101-delay="1"] { transition-delay: .06s; }
+.t101-reveal[data-t101-delay="2"] { transition-delay: .12s; }
+.t101-reveal[data-t101-delay="3"] { transition-delay: .18s; }
+
+
+/* ==========================================================================
+   17. RESPONSIVE
+   ========================================================================== */
+
+/* Carousel slides must be clipped by their track - without this the
+   duplicated swiper slides push the document wider than the viewport on
+   phones (a defect inherited from the original build). */
+.e-n-carousel,
+.elementor-widget-n-carousel .swiper,
+.elementor-main-swiper,
+.swiper { overflow: hidden; }
+
+@media (max-width: 1024px) {
+  body { font-size: 16px; }
+  .e-con.e-parent { padding-block: clamp(56px, 7.5vw, 100px); }
+}
+
+@media (max-width: 767px) {
+  body { font-size: 16px; }
+
+  h1, .elementor-widget-heading h1.elementor-heading-title { font-size: clamp(2.3rem, 10vw, 3.1rem); }
+  h2, .elementor-widget-heading h2.elementor-heading-title { font-size: clamp(1.9rem, 8vw, 2.5rem); }
+  h3, .elementor-widget-heading h3.elementor-heading-title { font-size: clamp(1.35rem, 5.5vw, 1.7rem); }
+
+  .e-con.e-parent { padding-block: 60px; }
+
+  .vintageBanner { min-height: 62vh; }
+
+  .elementor-button,
+  .wp-block-button__link {
+    padding: 16px 28px !important;
+    font-size: .875rem !important;
+    min-height: 48px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  body .t101-border-inner { padding: 26px 18px; }
+  body .t101-grid { grid-template-columns: 1fr; gap: 14px; }
+  body .t101-item { padding: 20px 20px; }
+  body .t101-nav button { padding: 9px 16px; font-size: .75rem; }
+
+  body .e-n-tab-title { padding: 10px 18px !important; font-size: .78rem !important; }
+
+  .elementor-14 .elementor-element.elementor-element-f7cf130 {
+    padding-inline: 12px;
+    gap: 8px;
+    padding-block: 8px;
+  }
+  .elementor-menu-toggle { flex: 0 0 auto; }
+  .elementor-location-header .elementor-button {
+    padding: 11px 18px !important;
+    font-size: .8rem !important;
+  }
+}
+
+
+/* ==========================================================================
+   18. ACCESSIBILITY
+   ========================================================================== */
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.elementor-button:focus-visible,
+.t101-nav button:focus-visible,
+.e-n-tab-title:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--t101-ink) !important;
+  outline-offset: 3px !important;
+  border-radius: var(--t101-radius-sm);
+}
+
+.skip-link:focus {
+  background: var(--t101-ink);
+  color: #FFFFFF;
+  padding: 12px 20px;
+  border-radius: var(--t101-radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .t101-reveal { opacity: 1 !important; transform: none !important; }
+  .elementor-widget-image:hover img,
+  .elementor-gallery-item:hover img { transform: none !important; }
+}
+
+@media (prefers-contrast: more) {
+  body { --t101-body: #2E2C2A; --t101-line: rgba(20, 20, 20, .28); }
+}
+
+
+/* ==========================================================================
+   19. ORNAMENT SUPPRESSION
+   The novelty artwork that made the site read as a children's brand. All of
+   it is decorative - no copy, pricing, photography or link is affected. Each
+   block can be re-enabled by deleting its rule.
+   ========================================================================== */
+
+/* Stick-figure canvas animations (cowboy vignette, catering scene, events) */
+#cr-anim-wrap,
+#catering-scene-wrap,
+#events-scene-wrap,
+.elementor-widget-html canvas { display: none !important; }
+
+/* Emoji ornament rows in the page heroes (beer mugs, flames, cutlery).
+   They were never caught by this section, so they still rendered - and on a
+   375px screen the row is wider than the viewport, which was pushing every
+   hero heading sideways and scrolling the whole page horizontally. */
+body .hero-icons { display: none !important; }
+
+/* Vintage corner brackets and dingbat ornaments on the menu card + gallery */
+body .t101-corner,
+body .t101-corner-ornament,
+body .t101-divider,
+body .t101-sec-rule .icon,
+body .t101-heat { display: none !important; }
+
+/* The rule beside section headings keeps its line, loses the glyph */
+body .t101-sec-rule .r { background: var(--t101-line); height: 1px; width: 56px; }
+
+
+/* ==========================================================================
+   20. GENERATED SWEEP - BORDERS
+   These elements draw their border from --e-global-color-primary or a
+   literal #000000. A hard black rule is one of the strongest dated
+   signals in the old design, so each is pulled back to the hairline.
+   The sticky header is excluded - it manages its own border in section 6.
+   ========================================================================== */
+
+body .elementor-widget-icon-list .elementor-icon-list-item:not(:last-child):after,
+body .elementor-widget-text-editor.elementor-drop-cap-view-framed .elementor-drop-cap,
+body .elementor-widget-text-editor.elementor-drop-cap-view-default .elementor-drop-cap,
+body .elementor-24 .elementor-element.elementor-element-a964b1d,
+body .elementor-24 .elementor-element.elementor-element-aa347e1,
+body .elementor-24 .elementor-element.elementor-element-bec473d,
+body .elementor-24 .elementor-element.elementor-element-2f660bd,
+body .elementor-45 .elementor-element.elementor-element-a70c9bf,
+body .elementor-45 .elementor-element.elementor-element-c188060,
+body .elementor-45 .elementor-element.elementor-element-8a945db,
+body .elementor-45 .elementor-element.elementor-element-83db811,
+body .elementor-45 .elementor-element.elementor-element-8756ffd,
+body .elementor-45 .elementor-element.elementor-element-fe5477d,
+body .elementor-45 .elementor-element.elementor-element-282bc7a,
+body .elementor-widget-icon.elementor-view-framed .elementor-icon,
+body .elementor-widget-icon.elementor-view-default .elementor-icon,
+body .elementor-99 .elementor-element.elementor-element-9878235.elementor-view-framed .elementor-icon,
+body .elementor-99 .elementor-element.elementor-element-9878235.elementor-view-default .elementor-icon,
+body .elementor-99 .elementor-element.elementor-element-587e419a,
+body .elementor-99 .elementor-element.elementor-element-7942b7a,
+body .elementor-99 .elementor-element.elementor-element-7bf29829,
+body .elementor-99 .elementor-element.elementor-element-3f1f266f,
+body .elementor-99 .elementor-element.elementor-element-7e1234a8 {
+  border-color: var(--t101-line);
+  /* Elementor mirrors this into a custom property nested containers inherit */
+  --border-color: var(--t101-line);
+}
+
+
+/* ==========================================================================
+   21. GENERATED SWEEP - TYPEFACES
+   Elements naming Rye / Oswald / Roboto / Merriweather / IM Fell English
+   directly rather than through a global. Rye was the novelty western face
+   behind most of the kids-site reaction; every instance is retired here.
+   ========================================================================== */
+
+body .elementor-14 .elementor-element.elementor-element-455f296 .elementor-nav-menu .elementor-item,
+body .elementor-22 .elementor-element.elementor-element-63c4a8e .elementor-heading-title,
+body .elementor-23 .elementor-element.elementor-element-8d32f6d .elementor-heading-title,
+body .elementor-24 .elementor-element.elementor-element-1cb869e .elementor-heading-title,
+body .elementor-24 .elementor-element.elementor-element-cf22384 .elementor-heading-title,
+body .elementor-24 .elementor-element.elementor-element-10bbadb .elementor-heading-title,
+body .elementor-24 .elementor-element.elementor-element-4f12692 .elementor-heading-title,
+body .elementor-45 .elementor-element.elementor-element-1556131.elementor-widget-n-tabs > .e-n-tabs > .e-n-tabs-heading > :is( .e-n-tab-title > .e-n-tab-title-text,
+body .e-n-tab-title ),
+body .elementor-45 .elementor-element.elementor-element-b41afe4 .elementor-heading-title,
+body .elementor-45 .elementor-element.elementor-element-e67454a .elementor-heading-title,
+body .elementor-45 .elementor-element.elementor-element-0b85f28 .elementor-heading-title,
+body .elementor-636 .elementor-element.elementor-element-4a88c5e .elementor-heading-title,
+body .elementor-14 .elementor-element.elementor-element-58c8324 .elementor-button,
+body .elementor-45 .elementor-element.elementor-element-780c6a5 .elementor-heading-title,
+body .elementor-99 .elementor-element.elementor-element-2b6f6081 .elementor-heading-title,
+body .elementor-99 .elementor-element.elementor-element-5f286e36,
+body .elementor-99 .elementor-element.elementor-element-3fd1ec54 .elementor-heading-title,
+body .elementor-99 .elementor-element.elementor-element-5f0c7d92,
+body .elementor-99 .elementor-element.elementor-element-45e5fc5f .elementor-heading-title,
+body .elementor-99 .elementor-element.elementor-element-269e506c {
+  font-family: var(--t101-sans);
+}
+
+body .elementor-14 .elementor-element.elementor-element-455f296 .elementor-nav-menu .elementor-item,
+body .elementor-22 .elementor-element.elementor-element-63c4a8e .elementor-heading-title,
+body .elementor-23 .elementor-element.elementor-element-8d32f6d .elementor-heading-title,
+body .elementor-24 .elementor-element.elementor-element-1cb869e .elementor-heading-title,
+body .elementor-24 .elementor-element.elementor-element-cf22384 .elementor-heading-title,
+body .elementor-24 .elementor-element.elementor-element-10bbadb .elementor-heading-title,
+body .elementor-24 .elementor-element.elementor-element-4f12692 .elementor-heading-title,
+body .elementor-45 .elementor-element.elementor-element-1556131.elementor-widget-n-tabs > .e-n-tabs > .e-n-tabs-heading > :is( .e-n-tab-title > .e-n-tab-title-text,
+body .e-n-tab-title ),
+body .elementor-45 .elementor-element.elementor-element-b41afe4 .elementor-heading-title,
+body .elementor-45 .elementor-element.elementor-element-e67454a .elementor-heading-title,
+body .elementor-45 .elementor-element.elementor-element-0b85f28 .elementor-heading-title,
+body .elementor-636 .elementor-element.elementor-element-4a88c5e .elementor-heading-title {
+  font-weight: 600;
+  letter-spacing: -.035em;
+  text-transform: none;
+  /* Several of these carry a sub-1.0 line-height from the old display face,
+     which collides on multi-line headings once set in a grotesk. */
+  line-height: 1.12;
+}
+
+
+/* ==========================================================================
+   22. GALLERY SHADOW RESET
+   The gallery widget carries a heavy drop shadow from the original build,
+   which reads as dated against the flat light surface.
+   ========================================================================== */
+
+body .elementor-gallery-item,
+body .elementor-gallery-item__image,
+body .elementor-gallery__container .e-gallery-item {
+  box-shadow: none !important;
+  border: 1px solid var(--t101-line);
+  border-radius: var(--t101-radius);
+}
+
+body .elementor-gallery-item:hover {
+  box-shadow: var(--t101-shadow) !important;
+}
+
+
+/* ==========================================================================
+   23. MENU ITEM TYPOGRAPHY
+   The item rows still carried the condensed uppercase treatment and a
+   dingbat before every name. Both are ornament from the old brand.
+   ========================================================================== */
+
+body .t101-item .t101-name::before { content: none; }
+
+body .t101-item .t101-name {
+  font-family: var(--t101-sans);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -.01em;
+  text-transform: none;
+  color: var(--t101-ink);
+}
+
+body .t101-item .t101-desc {
+  font-family: var(--t101-sans);
+  font-size: .95rem;
+  color: var(--t101-body);
+  opacity: 1;
+}
+
+body .t101-item .t101-desc em { color: var(--t101-muted); }
+
+body .t101-item .t101-price {
+  font-family: var(--t101-sans);
+  font-weight: 600;
+  color: var(--t101-ink);
+  letter-spacing: -.01em;
+}
+
+
+/* ==========================================================================
+   24. INLINE-STYLED CHIPS
+   The happy-hour time badges are bare divs carrying inline styles inside the
+   menu content, so they cannot be reached by class. The colour already
+   resolves correctly through the --t-ink remap; what remains is the square
+   corner and the condensed uppercase face from the old brand.
+   ========================================================================== */
+
+body [style*="var(--t-ink)"] {
+  border-radius: var(--t101-radius-pill) !important;
+  font-family: var(--t101-sans) !important;
+  font-weight: 500 !important;
+  letter-spacing: .02em !important;
+  padding: 13px 26px !important;
+}
+
+body [style*="var(--t-ink)"] > div {
+  font-family: var(--t101-sans) !important;
+  letter-spacing: .1em !important;
+}
+
+/* The decorative rule under section headings is now two stubs with the
+   glyph removed - drop it entirely. */
+body .t101-sec-rule { display: none !important; }
+
+
+/* ==========================================================================
+   25. NAVBAR, PILLS AND EDGES - CLIENT REVIEW PASS
+   Three issues raised on review: the nav wrapped onto two lines, the menu
+   category pills were oversized and still carried a fleur-de-lis ornament,
+   and several controls showed a hairline outline that read as unfinished.
+   ========================================================================== */
+
+/* --- Navigation: keep it on one line --------------------------------------
+   The nav widget was capped at max-width 44% in the header template, which
+   forced a wrap once the items were set in a grotesk. It now takes the room
+   it needs and never wraps. */
+
+body .elementor-14 .elementor-element.elementor-element-455f296 {
+  width: auto !important;
+  max-width: none !important;
+  --container-widget-width: auto;
+  flex: 1 1 auto;
+}
+
+body .elementor-nav-menu--main .elementor-nav-menu {
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+body .elementor-nav-menu--main .elementor-item { white-space: nowrap; }
+
+body .elementor-nav-menu--main .elementor-nav-menu > li {
+  margin-inline: clamp(6px, 1vw, 18px);
+}
+
+/* The new mark is a stacked portrait lockup, so it is sized by height -
+   driving it by width would make the header grow. */
+body .elementor-14 .elementor-element.elementor-element-9c13b3a img {
+  width: auto;
+  height: 54px;
+  max-width: none;
+}
+body .elementor-14 .elementor-element.elementor-element-9c13b3a {
+  width: auto !important;
+  max-width: none !important;
+}
+
+/* The active-page dot sat low and off-centre - weight carries it instead */
+.elementor-nav-menu--main .elementor-item.elementor-item-active::after { display: none; }
+body .elementor-widget-nav-menu .elementor-nav-menu--main .elementor-item.elementor-item-active {
+  font-weight: 600;
+  color: var(--t101-ink);
+}
+
+/* --- Category pills -------------------------------------------------------
+   The fleur-de-lis sits on the inner text span, not the button, which is why
+   hiding the button pseudo-element left it in place. */
+
+body .e-n-tab-title .e-n-tab-title-text::before,
+body .e-n-tab-title .e-n-tab-title-text::after { content: none !important; }
+
+body .e-n-tab-title,
+body .e-n-tab-title .e-n-tab-title-text {
+  font-family: var(--t101-sans) !important;
+  font-size: .875rem !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  letter-spacing: -.005em !important;
+  text-transform: none !important;
+  line-height: 1.2 !important;
+}
+
+/* --- Remove hairline outlines from controls -------------------------------
+   Filled surfaces read cleaner than outlined ones at this scale. */
+
+body .e-n-tab-title,
+body .t101-nav button {
+  border: 0 !important;
+  background: var(--t101-surface-2) !important;
+  color: var(--t101-body) !important;
+  box-shadow: none !important;
+}
+
+body .e-n-tab-title:hover,
+body .t101-nav button:hover {
+  background: var(--t101-surface-3) !important;
+  color: var(--t101-ink) !important;
+}
+
+body .e-n-tab-title[aria-selected="true"],
+body .e-n-tab-title.e-active,
+body .t101-nav button.active {
+  background: var(--t101-ink) !important;
+  color: #FFFFFF !important;
+  border: 0 !important;
+}
+
+.elementor-button,
+.elementor-button-link,
+a.elementor-button,
+button.elementor-button,
+.wp-block-button__link { border: 0 !important; }
+
+/* --- Menu card typography scale -------------------------------------------
+   The card headings were set from the page scale and overpowered the card. */
+
+body .t101-header h1,
+body .t101-header h2 { font-size: clamp(2rem, 3.4vw, 2.9rem); }
+body .t101-sec-head h2 { font-size: clamp(1.55rem, 2.6vw, 2.15rem); }
+body .t101-menu { max-width: 1080px; }
+
+/* --- Vertical rhythm ------------------------------------------------------
+   Two stacked sections were putting ~300px of empty bone between them, which
+   read as a broken layout rather than as breathing room. Columns also centre
+   against each other so short text no longer strands at the top of a tall
+   image. */
+
+.e-con.e-parent > .e-con-inner { align-items: center; }
+
+/* --- Nav item distribution ------------------------------------------------
+   The header nav carries Elementor's align-justify class, which spread the
+   items edge to edge once the widget was allowed its natural width. */
+
+body .elementor-widget-nav-menu .elementor-nav-menu--main .elementor-nav-menu,
+body .elementor-nav-menu__align-justify .elementor-nav-menu--main .elementor-nav-menu {
+  justify-content: center !important;
+}
+
+/* --- Eyebrow consistency --------------------------------------------------
+   The generated typeface sweep is more specific than the eyebrow styling, so
+   some kickers rendered as small bold body text instead of the ember label. */
+
+body .elementor-widget-heading h5.elementor-heading-title,
+body .elementor-widget-heading h6.elementor-heading-title {
+  font-family: var(--t101-sans) !important;
+  font-weight: 500 !important;
+  font-size: .75rem !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase !important;
+  color: var(--t101-accent) !important;
+  line-height: 1.5 !important;
+}
+
+/* The header nav also carries Elementor's --stretch class, which sets each
+   item to flex-grow. That overrides justify-content entirely and spread the
+   links edge to edge. Items size to their content instead. */
+
+body .elementor-nav-menu--main .elementor-nav-menu > li,
+body .elementor-nav-menu--stretch .elementor-nav-menu > li {
+  flex: 0 0 auto !important;
+}
+
+body .elementor-nav-menu--main .elementor-nav-menu {
+  width: auto;
+  margin-inline: auto;
+}
+
+
+/* ==========================================================================
+   26. ORPHANED COMPONENTS - HOURS & LOCATION, PRIVATE EVENTS
+   --------------------------------------------------------------------------
+   29 classes are used in the page markup but have no CSS anywhere in the
+   build - not in the Customizer CSS, not in the parent theme copy, not
+   inline. Both pages were therefore rendering as unstyled left-hugging text,
+   which is the "text alignment" problem: the markup describes contact cards,
+   leader-dot hour rows and a private-events panel, and none of it was ever
+   laid out. This section supplies the missing layout in the modern system.
+   ========================================================================== */
+
+/* --- Shared ---------------------------------------------------------------- */
+
+body .t101-location-wrap { text-align: center; }
+
+/* Emoji icons read as playful next to a grotesk; the labels carry the
+   meaning on their own. */
+body .t101-contact-icon,
+body .t101-hours-icon { display: none; }
+
+
+/* --- Contact badges -------------------------------------------------------- */
+
+body .t101-loc-contact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  max-width: 760px;
+  margin: 40px auto 0;
+  text-align: left;
+}
+
+body .t101-contact-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 22px 26px;
+  background: var(--t101-surface-2);
+  border-radius: var(--t101-radius-sm);
+  color: var(--t101-ink);
+  transition: background-color .2s var(--t101-ease), transform .2s var(--t101-ease);
+}
+body .t101-contact-badge:hover {
+  background: var(--t101-surface-3);
+  transform: translateY(-2px);
+}
+
+body .t101-contact-label {
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--t101-accent);
+}
+
+body .t101-contact-value {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--t101-ink);
+}
+
+
+/* --- Hours ----------------------------------------------------------------- */
+
+body .t101-hours-full {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  max-width: 760px;
+  margin: 16px auto 0;
+  text-align: left;
+}
+
+body .t101-hours-block {
+  /* A grid item defaults to min-width:auto, so it refuses to shrink below the
+     width of its widest row - "Sunday - Thursday ... 11:30 AM - 9:00 PM" with
+     a nowrap day label. On a phone that pushed the block 10px past the screen
+     edge and scrolled the whole page sideways. Letting it shrink, and letting
+     the row wrap, keeps it inside its column. */
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  padding: 26px 28px;
+  background: var(--t101-surface-2);
+  border-radius: var(--t101-radius-sm);
+}
+
+body .t101-hh-block { margin-top: 16px; }
+
+body .t101-hours-title {
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--t101-accent);
+  margin-bottom: 14px;
+}
+
+body .t101-hours-rule {
+  height: 1px;
+  background: var(--t101-line);
+  margin-bottom: 14px;
+}
+
+/* Day on the left, time on the right, a quiet leader between them */
+body .t101-hours-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 0;
+  font-size: .95rem;
+}
+
+body .t101-hours-day { color: var(--t101-body); white-space: nowrap; }
+
+body .t101-hours-dots {
+  flex: 1 1 auto;
+  border-bottom: 1px dotted var(--t101-line-strong);
+  transform: translateY(-4px);
+  min-width: 16px;
+}
+
+body .t101-hours-time {
+  color: var(--t101-ink);
+  font-weight: 500;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+body .t101-hh-note {
+  margin-top: 14px;
+  font-size: .85rem;
+  color: var(--t101-muted);
+  text-align: center;
+}
+
+
+/* --- Private events panel -------------------------------------------------- */
+
+body .t101-private-event {
+  position: relative;
+  max-width: 900px;
+  margin-inline: auto;
+  padding: clamp(32px, 5vw, 68px) clamp(22px, 4vw, 60px);
+  background: var(--t101-surface);
+  border-radius: var(--t101-radius);
+  box-shadow: var(--t101-shadow);
+  text-align: center;
+}
+
+/* The four corner glyphs are ornament from the old brand */
+body .t101-pe-corner { display: none; }
+
+body .t101-pe-label {
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--t101-accent);
+  margin-bottom: 14px;
+}
+
+body .t101-pe-heading {
+  font-family: var(--t101-sans);
+  font-weight: 600;
+  font-size: clamp(1.8rem, 3.4vw, 2.7rem);
+  letter-spacing: -.035em;
+  line-height: 1.12;
+  color: var(--t101-ink);
+  margin-bottom: 20px;
+}
+body .t101-pe-heading em { font-style: normal; color: var(--t101-accent); }
+
+/* The rules carried a glyph in the middle - keep the line, drop the glyph */
+body .t101-pe-rule,
+body .t101-pe-rule-bottom {
+  display: block;
+  height: 1px;
+  background: var(--t101-line);
+  width: 160px;
+  max-width: 160px;
+  margin: 24px auto;
+  font-size: 0;
+  line-height: 0;
+}
+body .t101-pe-rule span,
+body .t101-pe-rule-bottom span { display: none; }
+
+body .t101-pe-body,
+body .t101-pe-body-2 {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--t101-body);
+  max-width: 62ch;
+  margin-inline: auto;
+}
+body .t101-pe-body strong { color: var(--t101-ink); }
+
+body .t101-pe-menu {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 26px auto;
+  max-width: 700px;
+}
+
+body .t101-pe-menu-item {
+  padding: 9px 18px;
+  border-radius: var(--t101-radius-pill);
+  background: var(--t101-surface-2);
+  color: var(--t101-body);
+  font-size: .85rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+body .t101-pe-cta-text {
+  color: var(--t101-muted);
+  font-size: .95rem;
+  margin-bottom: 18px;
+}
+
+body .t101-pe-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+@media (max-width: 767px) {
+  body .t101-loc-contact,
+  body .t101-hours-full { grid-template-columns: 1fr; }
+  body .t101-hours-row { font-size: .9rem; }
+}
+
+/* --- Map ------------------------------------------------------------------
+   Rounded and unframed to match the rest of the surfaces. */
+
+body .elementor-widget-google_maps .elementor-custom-embed,
+body .elementor-widget-google_maps iframe {
+  border: 0 !important;
+  border-radius: var(--t101-radius);
+  overflow: hidden;
+}
+
+
+/* ==========================================================================
+   27. HERO, CTAs AND ORDER BAR
+   --------------------------------------------------------------------------
+   Structural pieces added in functions.php. The pattern is the one every
+   current restaurant site follows: a full-bleed photograph carrying a short
+   headline and two actions, with ordering reachable from anywhere.
+   ========================================================================== */
+
+.vintageBanner {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-inline: 24px;
+}
+
+/* The photograph needs a real scrim now that type sits on it */
+.vintageBanner {
+  /* A pool of shade behind the type keeps it legible while the edges of
+     the food photograph stay bright. */
+  background-image:
+    radial-gradient(ellipse 62% 58% at 50% 50%, rgba(12, 12, 12, .58) 0%, rgba(12, 12, 12, 0) 100%),
+    linear-gradient(180deg, rgba(12, 12, 12, .44) 0%, rgba(12, 12, 12, .24) 45%, rgba(12, 12, 12, .56) 100%),
+    url("/wp-content/uploads/2026/09/101-grill-spread-hero.jpg");
+  background-size: cover, cover, cover;
+  background-position: center, center, center 55%;
+}
+
+.t101-hero {
+  position: relative;
+  z-index: 2;
+  max-width: 780px;
+  margin-inline: auto;
+  color: #FFFFFF;
+}
+
+.t101-hero-eyebrow {
+  font-size: .74rem;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .78);
+  margin: 0 0 18px;
+}
+
+.t101-hero-title {
+  font-family: var(--t101-sans);
+  font-weight: 600;
+  font-size: clamp(2.8rem, 7vw, 5.2rem);
+  line-height: 1.02;
+  letter-spacing: -.045em;
+  color: #FFFFFF;
+  margin: 0;
+}
+.t101-hero-title span { font-weight: 300; }
+
+.t101-hero-sub {
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, .86);
+  max-width: 46ch;
+  margin: 22px auto 0;
+}
+
+.t101-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+/* Shared CTA used by the hero and the order bar */
+.t101-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 30px;
+  border-radius: var(--t101-radius-pill);
+  font-size: .95rem;
+  font-weight: 500;
+  letter-spacing: -.005em;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background-color .2s var(--t101-ease), color .2s var(--t101-ease),
+              transform .2s var(--t101-ease);
+}
+
+.t101-cta--solid {
+  background: #FFFFFF;
+  color: var(--t101-ink);
+}
+.t101-cta--solid:hover {
+  background: var(--t101-accent);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Prefixed with `body` because an unprefixed .t101-* rule loses the
+   box-shadow here, which left the outline unpainted and the button reading
+   as bare text over the hero photograph. */
+body .t101-cta--ghost {
+  background: transparent;
+  color: #FFFFFF;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .85);
+}
+body .t101-cta--ghost:hover {
+  background: rgba(255, 255, 255, .12);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* --- Order bar ------------------------------------------------------------ */
+
+.t101-orderbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 998;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, .98);
+  box-shadow: 0 -1px 0 rgba(20, 20, 20, .08);
+  transform: translateY(110%);
+  transition: transform .3s var(--t101-ease);
+}
+
+.t101-orderbar__text { display: flex; flex-direction: column; line-height: 1.3; min-width: 0; }
+.t101-orderbar__text strong {
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--t101-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.t101-orderbar__text span { font-size: .78rem; color: var(--t101-muted); }
+
+.t101-orderbar .t101-cta {
+  background: var(--t101-ink);
+  color: #FFFFFF;
+  min-height: 46px;
+  padding: 0 22px;
+  font-size: .88rem;
+  flex: 0 0 auto;
+}
+.t101-orderbar .t101-cta:hover { background: var(--t101-accent); }
+
+/* Revealed once the hero has scrolled past */
+.t101-past-hero .t101-orderbar { transform: translateY(0); }
+
+@media (max-width: 900px) {
+  .t101-orderbar { display: flex; }
+  body { padding-bottom: 0; }
+}
+
+@media (max-width: 767px) {
+  .vintageBanner { min-height: 78vh; }
+  .t101-hero-actions { flex-direction: column; align-items: stretch; }
+  .t101-hero-actions .t101-cta { width: 100%; }
+}
+
+/* --- Logo sizing ---------------------------------------------------------- */
+
+body .elementor-widget-theme-site-logo img {
+  width: auto;
+  height: 54px;
+  max-width: none;
+}
+
+@media (max-width: 767px) {
+  body .elementor-14 .elementor-element.elementor-element-9c13b3a img,
+  body .elementor-widget-theme-site-logo img { height: 42px; }
+}
+
+
+/* ==========================================================================
+   28. LUNCH MENU
+   The menu page content was replaced with the new lunch menu. Markup is
+   semantic and lives in the page; everything visual is here.
+   ========================================================================== */
+
+body .t101-menu h1,
+body .t101-menu .t101-header h2 {
+  font-family: var(--t101-sans);
+  font-weight: 600;
+  font-size: clamp(2.6rem, 5.5vw, 4rem);
+  letter-spacing: -.04em;
+  text-transform: none;
+  color: var(--t101-ink);
+}
+
+/* Group heading inside a section (From the Smoker, Add-Ons, ...) */
+body .t101-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 40px 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--t101-line);
+}
+body .t101-group-head:first-of-type { margin-top: 8px; }
+
+body .t101-group-head h3 {
+  font-family: var(--t101-sans);
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -.01em;
+  color: var(--t101-ink);
+  margin: 0;
+}
+
+body .t101-group-head span {
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--t101-accent);
+}
+
+/* Item: name and price on one baseline, description beneath */
+body .t101-item-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+body .t101-item .t101-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -.01em;
+  color: var(--t101-ink);
+}
+
+body .t101-item .t101-price {
+  flex: 0 0 auto;
+  font-weight: 600;
+  font-size: .95rem;
+  color: var(--t101-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+body .t101-item .t101-desc {
+  margin: 7px 0 0;
+  font-size: .92rem;
+  line-height: 1.6;
+  color: var(--t101-body);
+}
+
+/* Sections that are just name + price read better in tighter columns */
+body #t101-plates .t101-grid,
+body #t101-sides .t101-grid,
+body #t101-drinks .t101-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+body .t101-note {
+  margin-top: 22px;
+  padding: 14px 18px;
+  font-size: .9rem;
+  text-align: left;
+}
+
+body .t101-footer {
+  margin-top: 44px;
+  padding-top: 20px;
+}
+body .t101-footer p {
+  font-size: .8rem;
+  line-height: 1.6;
+  color: var(--t101-muted);
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  body .t101-group-head { margin: 28px 0 14px; flex-direction: column; gap: 4px; align-items: flex-start; }
+  body #t101-plates .t101-grid,
+  body #t101-sides .t101-grid,
+  body #t101-drinks .t101-grid { grid-template-columns: 1fr; }
+}
+
+/* --- Section photo strip --------------------------------------------------
+   Only 36 dishes were photographed against a 96-item menu, so thumbnails on
+   individual rows left most rows bare and the list read as unfinished. The
+   photography sits in a strip at the top of each section instead: every item
+   row stays identical, and the food still does the selling. */
+
+body .t101-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin: 0 0 40px;
+}
+
+body .t101-shot {
+  margin: 0;
+  min-width: 0;
+}
+
+body .t101-shot img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--t101-radius-sm);
+  background: var(--t101-surface-2);
+  transition: transform .5s var(--t101-ease);
+}
+
+body .t101-shot:hover img { transform: scale(1.03); }
+
+/* Clip the zoom without a wrapper element */
+body .t101-shot { overflow: hidden; border-radius: var(--t101-radius-sm); }
+
+body .t101-shot figcaption {
+  margin-top: 9px;
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: -.005em;
+  color: var(--t101-muted);
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  body .t101-strip {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  body .t101-shot figcaption { font-size: .72rem; }
+}
+
+
+/* ==========================================================================
+   29. HEADER AND FOOTER SPACING
+   --------------------------------------------------------------------------
+   Two problems. The header and footer are e-con-full containers with no
+   inline padding, so the logo and the footer columns sat hard against the
+   viewport edge. And the footer carried three different ad-hoc borders:
+   a top AND bottom rule on the row, 70px vertical stubs on the middle
+   column's label wrapper only, and a stray top rule under the first
+   column's content. They are reduced to a single hairline above the footer,
+   with spacing doing the separating.
+
+   Note: the label wrappers rely on a 70px min-height to sit their heading
+   centred. Do not zero it - the heading overlaps the address if you do.
+   ========================================================================== */
+
+/* --- Gutters -------------------------------------------------------------- */
+
+body .elementor-14 .elementor-element.elementor-element-f7cf130,
+body .elementor-99 .elementor-element.elementor-element-587e419a {
+  padding-inline: clamp(20px, 3.5vw, 56px);
+}
+
+/* --- Footer rhythm -------------------------------------------------------- */
+
+body .elementor-location-footer .e-con.e-parent {
+  padding-block: clamp(26px, 2.6vw, 36px);
+}
+
+/* --- One rule, not three -------------------------------------------------- */
+
+/* Row: keep the hairline above, drop the one below */
+body .elementor-99 .elementor-element.elementor-element-587e419a {
+  border-width: 1px 0 0 0;
+  --border-bottom-width: 0px;
+  gap: clamp(20px, 3vw, 48px);
+}
+
+/* Middle column label: lose the vertical stubs */
+body .elementor-99 .elementor-element.elementor-element-7bf29829 {
+  border-width: 0;
+  --border-left-width: 0px;
+  --border-right-width: 0px;
+}
+
+/* First column content: lose the stray top rule */
+body .elementor-99 .elementor-element.elementor-element-7942b7a {
+  border-width: 0;
+  --border-top-width: 0px;
+}
+
+/* --- Column balance ------------------------------------------------------- */
+
+@media (min-width: 768px) {
+  body .elementor-99 .elementor-element.elementor-element-38afbdea,
+  body .elementor-99 .elementor-element.elementor-element-7a5ff275,
+  body .elementor-99 .elementor-element.elementor-element-51906ab2 {
+    flex: 1 1 0;
+  }
+}
+
+@media (max-width: 767px) {
+  body .elementor-99 .elementor-element.elementor-element-587e419a {
+    --flex-direction: column;
+    flex-direction: column;
+    --min-height: 0px;
+    gap: 26px;
+  }
+}
+
+/* --- Floating badge -------------------------------------------------------
+   Positioned at left:91%, which pushed it past the right edge on phones and
+   helped widen the document. Pinned to the right, clear of the order bar. */
+
+body .elementor-99 .elementor-element.elementor-element-418a7f3 {
+  left: auto;
+  right: clamp(12px, 2vw, 28px);
+  top: auto;
+  bottom: clamp(16px, 3vh, 32px);
+}
+
+@media (max-width: 900px) {
+  body .elementor-99 .elementor-element.elementor-element-418a7f3 { bottom: 88px; }
+}
+
+/* --- Label wrappers -------------------------------------------------------
+   Each label sits in its own 70px-tall wrapper. Against a 12px label that is
+   a lot of air, and it is what made the footer read as half empty. Trimmed,
+   but NOT zeroed - collapsing these makes the heading overlap the address. */
+
+body .elementor-99 .elementor-element.elementor-element-1d8fabe9,
+body .elementor-99 .elementor-element.elementor-element-7bf29829,
+body .elementor-99 .elementor-element.elementor-element-7b1ffb1 {
+  --min-height: 34px;
+  min-height: 34px;
+}
+
+/* --- One rule per column, all three the same ------------------------------
+   Column 1 had no rule, column 2 had a top AND bottom rule, column 3 had a
+   top rule. Now every column separates its label from its content the same
+   way. */
+
+body .elementor-99 .elementor-element.elementor-element-7942b7a,
+body .elementor-99 .elementor-element.elementor-element-3f1f266f,
+body .elementor-99 .elementor-element.elementor-element-7e1234a8 {
+  border-style: solid;
+  border-width: 1px 0 0 0;
+  --border-top-width: 1px;
+  --border-right-width: 0px;
+  --border-bottom-width: 0px;
+  --border-left-width: 0px;
+  border-color: var(--t101-line);
+  padding-top: 16px;
+}
+
+/* --- Back-to-top badge ----------------------------------------------------
+   This is the "#up" control. Its offsets were left:124% / top:792px, which
+   parked it off the right edge and widened the document on phones. */
+
+body .elementor-99 .elementor-element.elementor-element-418a7f3 {
+  transform: none;
+  width: auto;
+  max-width: none;
+}
+
+body .elementor-99 .elementor-element.elementor-element-418a7f3 .elementor-icon {
+  background-color: rgba(255, 255, 255, .92);
+  border-color: var(--t101-line);
+  color: var(--t101-ink);
+  box-shadow: var(--t101-shadow-sm);
+  transition: background-color .2s var(--t101-ease), transform .2s var(--t101-ease);
+}
+body .elementor-99 .elementor-element.elementor-element-418a7f3 .elementor-icon:hover {
+  background-color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+/* The kit adds 20px under every widget; inside the footer that stacks on top
+   of the wrapper padding and pushes the labels away from the rule. */
+
+body .elementor-location-footer .elementor-element {
+  --widgets-spacing: 0px 0px;
+  --kit-widget-spacing: 0px;
+}
+
+body .elementor-location-footer .elementor-widget:not(:last-child) {
+  margin-block-end: 0;
+}
+
+/* Elementor pins this with `body:not(.rtl) … {left:91%}`, which outranks a
+   plain body-prefixed selector - hence the document still measuring 745px
+   wide on a 390px screen. Matched at the same specificity, plus !important
+   on the offsets that actually caused the overflow. */
+
+body:not(.rtl) .elementor-99 .elementor-element.elementor-element-418a7f3,
+body.rtl .elementor-99 .elementor-element.elementor-element-418a7f3 {
+  left: auto !important;
+  right: clamp(12px, 2vw, 28px) !important;
+  top: auto !important;
+  bottom: clamp(16px, 3vh, 32px);
+  --width: auto;
+  width: auto;
+}
+
+/* The header logo and nav width overrides are desktop layout decisions; on
+   mobile the burger takes over and they were crowding the logo. */
+
+@media (max-width: 767px) {
+  body .elementor-14 .elementor-element.elementor-element-455f296,
+  body .elementor-14 .elementor-element.elementor-element-9c13b3a {
+    width: auto !important;
+    max-width: none !important;
+    flex: 0 0 auto !important;
+  }
+
+  body .elementor-14 .elementor-element.elementor-element-f7cf130 {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  body .elementor-14 .elementor-element.elementor-element-9c13b3a { margin-inline-end: auto; }
+}
+
+
+/* ==========================================================================
+   30. STOCK BACKGROUNDS AND INHERITED TEXT COLOUR
+   --------------------------------------------------------------------------
+   The photography swap in structural.php rewrites <img> tags, which cannot
+   reach a background-image set on a container. An audit across all seven
+   pages found four section backgrounds still running the old artwork - two
+   of them the black-and-white desert scenery, including the contact hero.
+   Elementor declares these with a :not() qualifier, so !important is used
+   rather than trying to out-specify a generated selector.
+   ========================================================================== */
+
+body .elementor-24 .elementor-element.elementor-element-344aab0 {
+  background-image: url("/wp-content/uploads/2026/09/101-grill-brisket-sandwich-side.jpg") !important;
+  background-position: center !important;
+}
+
+body .elementor-22 .elementor-element.elementor-element-762c578 {
+  background-image: url("/wp-content/uploads/2026/09/101-grill-baby-back-ribs.jpg") !important;
+  background-position: center !important;
+}
+
+body .elementor-636 .elementor-element.elementor-element-8147181 {
+  background-image: url("/wp-content/uploads/2026/09/101-grill-salmon-dinner.jpg") !important;
+  background-position: center !important;
+}
+
+/* Private events keeps 25907_DSC2550 - a real photograph of the team working
+   an event, which suits that page better than a plated dish. */
+
+/* --- Text sitting on those dark hero images ------------------------------
+   The headings are coloured directly by Elementor and were fine. The body
+   copy relied on inheritance, so it needs the wrapper to carry the colour. */
+
+body .elementor-636 .elementor-element.elementor-element-a642b35 {
+  color: var(--t101-body);
+}
+
+/* --- Contact hero scrim ---------------------------------------------------
+   The overlay was a flat black at low opacity, which left a single plated
+   dish competing with the headline. A graded scrim sits the type on a darker
+   band while the food stays visible. */
+
+body .elementor-636 .elementor-element.elementor-element-8147181::before {
+  background-image: linear-gradient(180deg, rgba(12, 12, 12, .55) 0%, rgba(12, 12, 12, .34) 40%, rgba(12, 12, 12, .62) 100%) !important;
+  opacity: 1 !important;
+}
+
+/* --- Contact: map and form -----------------------------------------------
+   The two sat at different heights with the map floating small inside its
+   column. They now share a baseline and the map fills its side. */
+
+body .elementor-636 .elementor-element.elementor-element-2b264ee {
+  --align-items: stretch;
+  align-items: stretch;
+  gap: clamp(20px, 3vw, 44px);
+}
+
+body .elementor-636 .elementor-element.elementor-element-a9e41d4,
+body .elementor-636 .elementor-element.elementor-element-a642b35 {
+  align-self: stretch;
+}
+
+body .elementor-636 .elementor-element.elementor-element-a9e41d4 .elementor-widget-container,
+body .elementor-636 .elementor-element.elementor-element-a9e41d4 .elementor-custom-embed {
+  height: 100%;
+}
+
+body .elementor-636 .elementor-element.elementor-element-a9e41d4 iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  border-radius: var(--t101-radius);
+  display: block;
+}
+
+/* --- Interior page heroes -------------------------------------------------
+   These ran at 70vh. The new photography is single dishes shot close, so at
+   that height the image is enlarged past the point of reading as food - the
+   catering hero became a plate edge and a field of black. A shorter band
+   shows more of the dish and gets the visitor to the content sooner. */
+
+body .elementor-24 .elementor-element.elementor-element-344aab0,
+body .elementor-22 .elementor-element.elementor-element-762c578,
+body .elementor-23 .elementor-element.elementor-element-7554774,
+body .elementor-636 .elementor-element.elementor-element-8147181 {
+  --min-height: clamp(300px, 42vh, 460px);
+  min-height: clamp(300px, 42vh, 460px);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Same graded scrim on every interior hero, so the headings sit consistently */
+body .elementor-24 .elementor-element.elementor-element-344aab0::before,
+body .elementor-22 .elementor-element.elementor-element-762c578::before,
+body .elementor-23 .elementor-element.elementor-element-7554774::before {
+  background-image: linear-gradient(180deg, rgba(12, 12, 12, .55) 0%, rgba(12, 12, 12, .34) 40%, rgba(12, 12, 12, .62) 100%) !important;
+  opacity: 1 !important;
+}
+
+
+/* ==========================================================================
+   31. PRINTABLE MENU DOWNLOAD
+   --------------------------------------------------------------------------
+   The shared ghost CTA is white-on-photograph, which is correct over the hero
+   but invisible on the menu page's bone ground. It is restated here as
+   ink-on-bone for that one context.
+   ========================================================================== */
+
+body .t101-menu-download {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 clamp(26px, 4vw, 42px);
+}
+
+/* Inherits display:inline-flex, align-items:center and min-height:52px from
+   .t101-cta. Do not re-declare align-items here: `baseline` pins the label to
+   the top of that 52px box and it rides up over the pill's edge. */
+body .t101-menu-download .t101-cta--ghost {
+  gap: 10px;
+  color: var(--t101-ink);
+  box-shadow: inset 0 0 0 1.5px rgba(20, 20, 20, .22);
+}
+
+body .t101-menu-download .t101-cta--ghost:hover {
+  background: rgba(20, 20, 20, .05);
+  color: var(--t101-ink);
+  box-shadow: inset 0 0 0 1.5px rgba(20, 20, 20, .42);
+}
+
+body .t101-menu-download .t101-cta--ghost span {
+  font-size: .7rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  line-height: 1;
+  opacity: .55;
+}
