@@ -1515,6 +1515,84 @@ body .elementor-widget-google_maps iframe {
   overflow: hidden;
 }
 
+/* The page's own Elementor CSS still carries the rejected heritage treatment
+   for this widget: a 20px black frame, an offset drop shadow, a cream fill
+   and a sepia filter, plus two pseudo-elements - a dashed inset rule and a
+   Rye-serif "FIND US" badge pinned to the top edge. The badge was being cut
+   in half by the overflow:hidden above, and the cream fill was what showed
+   through once the embed stopped loading. None of it belongs in this design. */
+body .elementor-widget-google_maps .elementor-custom-embed {
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+body .elementor-widget-google_maps .elementor-custom-embed::before,
+body .elementor-widget-google_maps .elementor-custom-embed::after {
+  content: none !important;
+}
+
+/* Standing in for the retired map embed. */
+body .t101-findus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: clamp(32px, 5vw, 52px) 24px;
+  background: var(--t101-surface-2);
+  border-radius: var(--t101-radius);
+  text-align: center;
+}
+
+body .t101-findus-label {
+  margin: 0;
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--t101-accent);
+}
+
+body .t101-findus-addr {
+  margin: 0;
+  font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: 1.35;
+  color: var(--t101-ink);
+}
+
+body .t101-findus-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 20px;
+  margin-top: 4px;
+}
+
+/* .t101-cta--solid is a white pill, which is right over the hero photograph
+   and invisible on this light panel. Restated as the dark pill used in the
+   header. */
+body .t101-findus .t101-cta--solid {
+  background: var(--t101-ink);
+  color: #FFFFFF;
+}
+
+body .t101-findus .t101-cta--solid:hover {
+  background: var(--t101-accent);
+  color: #FFFFFF;
+}
+
+body .t101-findus-link {
+  font-size: .9rem;
+  color: var(--t101-body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+body .t101-findus-link:hover { color: var(--t101-ink); }
+
 
 /* ==========================================================================
    27. HERO, CTAs AND ORDER BAR
