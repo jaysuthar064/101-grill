@@ -625,60 +625,6 @@ function babayaga_child_fix_external_links( $html ) {
 }
 
 /**
- * Replace the dead Google Maps embed.
- *
- * Hours & Location rendered a blank cream box where the map should be. The
- * widget points at the keyless embed
- * maps.google.com/maps?...&output=embed, and Google has retired it: that URL
- * now answers 404 with X-Frame-Options SAMEORIGIN, so nothing can paint. The
- * modern www.google.com/maps?...&output=embed only yields an "Open in Maps"
- * button, and OpenStreetMap's tile servers answer 403 for this kind of use
- * ("not following the tile usage policy"), so neither is a fix.
- *
- * A real map needs a Google Maps Embed API key. Until there is one, a dead
- * iframe is worse than no iframe: this puts the address and working
- * directions links in its place, which is what a guest actually wants.
- *
- * An embed that already uses the supported /maps/embed/v1/ endpoint - i.e.
- * someone has added a key - is left completely alone.
- *
- * @param string $html Complete page HTML.
- * @return string
- */
-function babayaga_child_replace_dead_map( $html ) {
-	if ( false === stripos( $html, 'elementor-widget-google_maps' ) ) {
-		return $html;
-	}
-
-	$addr  = '28434 Roadside Dr., Agoura Hills, CA 91301';
-	$dir   = 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode( $addr );
-	$place = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $addr );
-
-	// Deliberately NOT .elementor-custom-embed: that class carries the page's
-	// vintage map chrome and the transparent-background reset that goes with it.
-	$panel  = '<div class="t101-findus">';
-	$panel .= '<p class="t101-findus-label">Find us</p>';
-	$panel .= '<p class="t101-findus-addr">28434 Roadside Dr.<br>Agoura Hills, CA 91301</p>';
-	$panel .= '<div class="t101-findus-actions">';
-	$panel .= '<a class="t101-cta t101-cta--solid" href="' . esc_url( $dir ) . '" target="_blank" rel="noopener">Get directions</a>';
-	$panel .= '<a class="t101-findus-link" href="' . esc_url( $place ) . '" target="_blank" rel="noopener">View on Google Maps</a>';
-	$panel .= '</div></div>';
-
-	return preg_replace_callback(
-		'#<div class="elementor-custom-embed">\s*<iframe\b[^>]*>.*?</iframe>\s*</div>#is',
-		static function ( $m ) use ( $panel ) {
-			// Only the retired keyless embed; a keyed one is left as it is.
-			if ( false === stripos( $m[0], 'output=embed' ) ) {
-				return $m[0];
-			}
-
-			return $panel;
-		},
-		$html
-	);
-}
-
-/**
  * Apply both markup changes to the finished page.
  *
  * @param string $html Complete page HTML.
@@ -702,7 +648,6 @@ function babayaga_child_filter_output( $html ) {
 
 	$html = babayaga_child_rewrite_order_links( $html );
 	$html = babayaga_child_fix_external_links( $html );
-	$html = babayaga_child_replace_dead_map( $html );
 	$html = babayaga_child_swap_menu( $html );
 	$html = babayaga_child_dedupe_photos( $html, $base );
 	$html = babayaga_child_add_srcset( $html, $base );
