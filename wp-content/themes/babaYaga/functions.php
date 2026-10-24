@@ -124,6 +124,29 @@ function babayaga_child_site_icon() {
 add_action( 'wp_head', 'babayaga_child_site_icon' );
 
 /**
+ * Cap stored revisions.
+ *
+ * Elementor writes a revision on every save and each one carries a full copy
+ * of the page's _elementor_data. On this site that reached 621 revisions
+ * holding 27MB of duplicated builder JSON - about three quarters of a 61MB
+ * database, all of it re-dumped on every UpdraftPlus run.
+ *
+ * Ten is still a real undo history; the editor's Revisions panel keeps
+ * working exactly as before. WordPress prunes the excess as new revisions
+ * are written, so this bounds future growth - it does not delete the
+ * backlog, which is a one-off cleanup.
+ *
+ * Raise or lower the number here; returning -1 restores unlimited.
+ *
+ * @param int $num Revisions to keep.
+ * @return int
+ */
+function babayaga_child_revisions_to_keep( $num ) {
+	return 10;
+}
+add_filter( 'wp_revisions_to_keep', 'babayaga_child_revisions_to_keep' );
+
+/**
  * Menu building blocks: breakfast data, its renderer, and the Elementor widget.
  */
 foreach ( array( 'inc/menu-breakfast.php', 'inc/class-breakfast-widget.php' ) as $babayaga_part ) {
