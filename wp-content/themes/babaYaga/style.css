@@ -2199,3 +2199,71 @@ body .t101-menu-download .t101-cta--ghost span {
   line-height: 1;
   opacity: .55;
 }
+
+
+/* ==========================================================================
+   32. REAL PHOTOGRAPHY IN THE PAGE HEROES
+   --------------------------------------------------------------------------
+   babayaga_child_photo_map() already replaces the AI-generated Gemini stock
+   with the restaurant's own photography, but it rewrites <img> tags only -
+   and these two heroes are Elementor background images, so they kept the
+   generated artwork. Same mapping, applied where the filter cannot reach.
+   ========================================================================== */
+
+body .elementor-24 .elementor-element.elementor-element-344aab0:not(.elementor-motion-effects-element-type-background) {
+  background-image: url("/wp-content/uploads/2026/09/101-grill-baby-back-ribs.jpg") !important;
+  background-position: center 55% !important;
+}
+
+body .elementor-636 .elementor-element.elementor-element-8147181:not(.elementor-motion-effects-element-type-background) {
+  background-image: url("/wp-content/uploads/2026/09/101-grill-buffalo-wings.jpg") !important;
+  background-position: center 55% !important;
+}
+
+
+/* ==========================================================================
+   33. PHOTOGRAPHY BAND - CATERING AND PRIVATE EVENTS
+   --------------------------------------------------------------------------
+   Both pages sell the food and neither showed any. The strip itself is the
+   menu's .t101-strip / .t101-shot component, so the 4:3 box, the crop and
+   the responsive grid come for free; only the surrounding band is new.
+   ========================================================================== */
+
+body .t101-taste {
+  background: var(--t101-surface-2);
+  padding: clamp(48px, 7vw, 88px) 20px clamp(26px, 4vw, 48px);
+}
+
+body .t101-taste-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+body .t101-taste-label {
+  margin: 0 0 10px;
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--t101-accent);
+}
+
+body .t101-taste-title {
+  margin: 0 0 clamp(26px, 4vw, 40px);
+  font-size: clamp(1.6rem, 3.4vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: -.03em;
+  line-height: 1.15;
+  color: var(--t101-ink);
+}
+
+/* The strip carries a 40px bottom margin for the menu's stacked sections;
+   inside this band the padding already provides that space. */
+body .t101-taste .t101-strip { margin-bottom: 0; }
+
+body .t101-taste figcaption {
+  margin-top: 8px;
+  font-size: .78rem;
+  color: var(--t101-body);
+}

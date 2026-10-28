@@ -625,6 +625,103 @@ function babayaga_child_fix_external_links( $html ) {
 }
 
 /**
+ * Photography for the two pages that sell food but never showed any.
+ *
+ * Catering and Private Events both argue that 101 Grill should feed your
+ * event, and both did it in words alone - between them they carried zero
+ * dish photographs while thirty-six commissioned shots sat in the library.
+ *
+ * The band reuses the menu's own .t101-strip / .t101-shot component rather
+ * than inventing a layout, so it inherits the 4:3 aspect-ratio box, the
+ * object-fit crop, lazy loading and the responsive grid already in the
+ * stylesheet. Full-size sources are used on purpose: the srcset pass below
+ * then advertises the 768/1024/1536 renditions and the browser takes what
+ * it needs.
+ *
+ * Keyed to the page slug, so it appears on these two pages and nowhere else.
+ *
+ * @return array|null Heading and shots, or null if this is not one of them.
+ */
+function babayaga_child_taste_band() {
+	$bands = array(
+		'catering'       => array(
+			'label' => 'From our kitchen',
+			'title' => 'A taste of what we cater',
+			'shots' => array(
+				array( 'tri-tip-sandwich-side', 'Slow-smoked tri-tip, served with a side' ),
+				array( 'bbq-chopped-salad', 'BBQ chopped salad' ),
+				array( 'mac-and-cheese', '101 Grill mac and cheese' ),
+				array( 'cornbread', 'House cornbread' ),
+			),
+		),
+		'private-events' => array(
+			'label' => 'On the table',
+			'title' => 'What your guests will be eating',
+			'shots' => array(
+				array( 'baby-back-ribs', 'Slow-smoked baby back ribs' ),
+				array( 'salmon-dinner', 'Grilled salmon dinner' ),
+				array( 'mixed-vegetables', 'Seasonal mixed vegetables' ),
+				array( 'chocolate-lava-cake', 'Chocolate lava cake' ),
+			),
+		),
+	);
+
+	$slug = get_post_field( 'post_name', get_queried_object_id() );
+
+	return isset( $bands[ $slug ] ) ? $bands[ $slug ] : null;
+}
+
+/**
+ * Append the photography band just before the footer.
+ *
+ * @param string $html Complete page HTML.
+ * @return string
+ */
+function babayaga_child_inject_taste_band( $html ) {
+	if ( false !== strpos( $html, 't101-taste' ) || false === strpos( $html, '</main>' ) ) {
+		return $html;
+	}
+
+	$band = babayaga_child_taste_band();
+
+	if ( null === $band ) {
+		return $html;
+	}
+
+	$uploads = trailingslashit( wp_get_upload_dir()['baseurl'] );
+	$shots   = '';
+
+	foreach ( $band['shots'] as $shot ) {
+		list( $stem, $caption ) = $shot;
+		$file = '2026/09/101-grill-' . $stem . '.jpg';
+
+		if ( ! file_exists( trailingslashit( wp_get_upload_dir()['basedir'] ) . $file ) ) {
+			continue;
+		}
+
+		$shots .= '<figure class="t101-shot">';
+		$shots .= '<img src="' . esc_url( $uploads . $file ) . '" alt="' . esc_attr( $caption ) . '"';
+		$shots .= ' loading="lazy" decoding="async" width="768" height="576">';
+		$shots .= '<figcaption>' . esc_html( $caption ) . '</figcaption>';
+		$shots .= '</figure>';
+	}
+
+	if ( '' === $shots ) {
+		return $html;
+	}
+
+	$block  = '<section class="t101-taste"><div class="t101-taste-inner">';
+	$block .= '<p class="t101-taste-label">' . esc_html( $band['label'] ) . '</p>';
+	$block .= '<h2 class="t101-taste-title">' . esc_html( $band['title'] ) . '</h2>';
+	$block .= '<div class="t101-strip">' . $shots . '</div>';
+	$block .= '</div></section>';
+
+	$pos = strrpos( $html, '</main>' );
+
+	return substr_replace( $html, $block, $pos, 0 );
+}
+
+/**
  * Apply both markup changes to the finished page.
  *
  * @param string $html Complete page HTML.
@@ -648,6 +745,7 @@ function babayaga_child_filter_output( $html ) {
 
 	$html = babayaga_child_rewrite_order_links( $html );
 	$html = babayaga_child_fix_external_links( $html );
+	$html = babayaga_child_inject_taste_band( $html );
 	$html = babayaga_child_swap_menu( $html );
 	$html = babayaga_child_dedupe_photos( $html, $base );
 	$html = babayaga_child_add_srcset( $html, $base );
