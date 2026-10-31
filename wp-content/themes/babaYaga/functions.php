@@ -149,7 +149,7 @@ add_filter( 'wp_revisions_to_keep', 'babayaga_child_revisions_to_keep' );
 /**
  * Menu building blocks: breakfast data, its renderer, and the Elementor widget.
  */
-foreach ( array( 'inc/menu-breakfast.php', 'inc/class-breakfast-widget.php' ) as $babayaga_part ) {
+foreach ( array( 'inc/menu-breakfast.php', 'inc/class-breakfast-widget.php', 'inc/catering-form.php' ) as $babayaga_part ) {
 	$babayaga_path = get_stylesheet_directory() . '/' . $babayaga_part;
 
 	if ( file_exists( $babayaga_path ) ) {

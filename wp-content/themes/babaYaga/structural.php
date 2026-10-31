@@ -456,6 +456,10 @@ function babayaga_child_menu_markup() {
 		return '';
 	}
 
+	// Menu photography ships with the theme, so the path is resolved here
+	// rather than hard-coded into the HTML file.
+	$html = str_replace( '{{THEME}}', get_stylesheet_directory_uri(), $html );
+
 	if ( ! function_exists( 'babayaga_child_breakfast_section' ) ) {
 		return $html;
 	}
@@ -804,7 +808,8 @@ function babayaga_child_fix_planning_cta( $html ) {
 		return $html;
 	}
 
-	$url = esc_url( home_url( '/contact-us/' ) );
+	// The enquiry form lives on this same page, so jump to it.
+	$url = '#catering-enquiry';
 
 	return preg_replace_callback(
 		'#<a\b([^>]*)href="mailto:[^"]*"([^>]*)>((?:(?!</a>).)*Start Planning(?:(?!</a>).)*)</a>#is',
@@ -813,6 +818,32 @@ function babayaga_child_fix_planning_cta( $html ) {
 		},
 		$html
 	);
+}
+
+/**
+ * Put the catering enquiry form on the catering page.
+ *
+ * It sits after the photography band and immediately before the footer, so
+ * the page runs: what we cater, what it looks like, then the form. The
+ * "Start Planning" button higher up jumps to it.
+ *
+ * @param string $html Complete page HTML.
+ * @return string
+ */
+function babayaga_child_inject_catering_form( $html ) {
+	if ( ! function_exists( 'babayaga_child_catering_form' ) ) {
+		return $html;
+	}
+
+	if ( false !== strpos( $html, 'id="catering-enquiry"' ) || false === strpos( $html, '</main>' ) ) {
+		return $html;
+	}
+
+	if ( 'catering' !== get_post_field( 'post_name', get_queried_object_id() ) ) {
+		return $html;
+	}
+
+	return substr_replace( $html, babayaga_child_catering_form(), strrpos( $html, '</main>' ), 0 );
 }
 
 /**
@@ -842,6 +873,7 @@ function babayaga_child_filter_output( $html ) {
 	$html = babayaga_child_update_hours( $html );
 	$html = babayaga_child_fix_planning_cta( $html );
 	$html = babayaga_child_inject_taste_band( $html );
+	$html = babayaga_child_inject_catering_form( $html );
 	$html = babayaga_child_swap_menu( $html );
 	$html = babayaga_child_dedupe_photos( $html, $base );
 	$html = babayaga_child_add_srcset( $html, $base );

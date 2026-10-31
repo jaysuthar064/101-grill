@@ -2299,3 +2299,171 @@ body .t101-price {
 /* Long sections read better with a little more air between the chunks now
    that no photograph separates them. */
 body .t101-menu .t101-grid + .t101-group-head { margin-top: clamp(34px, 4.5vw, 52px); }
+
+
+/* ==========================================================================
+   35. CATERING ENQUIRY FORM
+   --------------------------------------------------------------------------
+   Labels sit above their field, never inside it as a placeholder; errors sit
+   below the field they belong to and are tied to it with aria-describedby.
+   Controls are 48px tall so they clear the 44px touch target on a phone.
+   ========================================================================== */
+
+body .t101-enquiry {
+  background: var(--t101-surface-2);
+  padding: clamp(48px, 7vw, 92px) 20px clamp(44px, 6vw, 80px);
+  scroll-margin-top: 96px;
+}
+
+body .t101-enquiry-inner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+body .t101-enquiry-label {
+  margin: 0 0 10px;
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--t101-accent);
+  text-align: center;
+}
+
+body .t101-enquiry-title {
+  margin: 0 0 12px;
+  font-size: clamp(1.6rem, 3.4vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: -.03em;
+  line-height: 1.15;
+  color: var(--t101-ink);
+  text-align: center;
+}
+
+body .t101-enquiry-intro {
+  margin: 0 auto clamp(28px, 4vw, 42px);
+  max-width: 52ch;
+  text-align: center;
+  color: var(--t101-body);
+}
+
+body .t101-enquiry-ok,
+body .t101-enquiry-err {
+  margin: 0 0 24px;
+  padding: 14px 18px;
+  border-radius: var(--t101-radius-sm);
+  font-size: .95rem;
+}
+
+body .t101-enquiry-ok {
+  background: rgba(20, 20, 20, .04);
+  color: var(--t101-ink);
+  box-shadow: inset 0 0 0 1.5px rgba(20, 20, 20, .18);
+}
+
+body .t101-enquiry-err {
+  background: rgba(169, 72, 44, .07);
+  color: #8A3A23;
+  box-shadow: inset 0 0 0 1.5px rgba(169, 72, 44, .35);
+}
+
+body .t101-enquiry-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+}
+
+body .t101-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  min-width: 0;
+}
+
+body .t101-field--wide,
+body .t101-enquiry-actions { grid-column: 1 / -1; }
+
+body .t101-field label {
+  font-size: .82rem;
+  font-weight: 500;
+  letter-spacing: -.005em;
+  color: var(--t101-ink);
+}
+
+body .t101-req,
+body .t101-opt {
+  font-size: .68rem;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+body .t101-req { color: var(--t101-accent); }
+body .t101-opt { color: var(--t101-body); opacity: .72; }
+
+body .t101-field input,
+body .t101-field select,
+body .t101-field textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 1rem;              /* 16px keeps iOS from zooming on focus */
+  color: var(--t101-ink);
+  background: #FFFFFF;
+  border: 0;
+  border-radius: var(--t101-radius-sm);
+  box-shadow: inset 0 0 0 1.5px rgba(20, 20, 20, .18);
+  transition: box-shadow .18s var(--t101-ease);
+}
+
+body .t101-field textarea { min-height: 128px; resize: vertical; }
+
+body .t101-field input:hover,
+body .t101-field select:hover,
+body .t101-field textarea:hover { box-shadow: inset 0 0 0 1.5px rgba(20, 20, 20, .32); }
+
+body .t101-field input:focus-visible,
+body .t101-field select:focus-visible,
+body .t101-field textarea:focus-visible {
+  outline: 2px solid var(--t101-accent);
+  outline-offset: 2px;
+  box-shadow: inset 0 0 0 1.5px var(--t101-accent);
+}
+
+body .t101-field [aria-invalid="true"] { box-shadow: inset 0 0 0 1.5px #A9482C; }
+
+body .t101-field-err {
+  font-size: .8rem;
+  color: #8A3A23;
+}
+
+body .t101-enquiry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  margin-top: 6px;
+}
+
+/* .t101-cta--solid is a white pill for the hero photograph; on this light
+   panel it needs the dark treatment used in the header. */
+body .t101-enquiry .t101-cta--solid {
+  background: var(--t101-ink);
+  color: #FFFFFF;
+  border: 0;
+  cursor: pointer;
+}
+
+body .t101-enquiry .t101-cta--solid:hover { background: var(--t101-accent); color: #FFFFFF; }
+
+body .t101-enquiry-note { font-size: .88rem; color: var(--t101-body); }
+body .t101-enquiry-note a { color: var(--t101-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Honeypot: never shown, never announced, never tabbed to. */
+body .t101-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+@media (max-width: 640px) {
+  body .t101-enquiry-form { grid-template-columns: 1fr; }
+}
