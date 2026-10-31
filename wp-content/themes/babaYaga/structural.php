@@ -722,6 +722,100 @@ function babayaga_child_inject_taste_band( $html ) {
 }
 
 /**
+ * Current opening hours.
+ *
+ * Supplied by the client on 2026-10-31. The old block carried two rows
+ * ("Sunday - Thursday", "Friday & Saturday"); the new pattern needs four,
+ * because Saturday and Sunday now open at 9:00 AM while the week opens at
+ * 11:30. The rows live in an Elementor HTML widget on page 20, so they are
+ * rewritten here rather than in the database.
+ *
+ * @return array day => hours.
+ */
+function babayaga_child_dining_hours() {
+	return array(
+		'Monday &ndash; Thursday' => '11:30 AM &ndash; 9:00 PM',
+		'Friday'                  => '11:30 AM &ndash; 10:00 PM',
+		'Saturday'                => '9:00 AM &ndash; 10:00 PM',
+		'Sunday'                  => '9:00 AM &ndash; 9:00 PM',
+	);
+}
+
+/**
+ * Swap the two dining rows for the current four.
+ *
+ * The dining block is the first set of .t101-hours-row elements on the page;
+ * the happy-hour rows follow it and are left alone.
+ *
+ * @param string $html Complete page HTML.
+ * @return string
+ */
+function babayaga_child_update_hours( $html ) {
+	if ( false === strpos( $html, 't101-hours-row' ) ) {
+		return $html;
+	}
+
+	$rows = '';
+
+	foreach ( babayaga_child_dining_hours() as $day => $time ) {
+		$rows .= '<div class="t101-hours-row">';
+		$rows .= '<span class="t101-hours-day">' . $day . '</span>';
+		$rows .= '<span class="t101-hours-dots"></span>';
+		$rows .= '<span class="t101-hours-time">' . $time . '</span>';
+		$rows .= '</div>';
+	}
+
+	$done = 0;
+
+	// A row's children are spans, so the first </div> closes the row. Do NOT
+	// extend this pattern to a second </div>: that reaches past the row into
+	// the block's own closing tag and takes the happy-hour rows with it.
+	return preg_replace_callback(
+		'#<div class="t101-hours-row">.*?</div>#s',
+		static function ( $m ) use ( $rows, &$done ) {
+			$done++;
+
+			// The two dining rows come first and become the current four.
+			// Everything after them (happy hour) is left untouched.
+			if ( 1 === $done ) {
+				return $rows;
+			}
+
+			return 2 === $done ? '' : $m[0];
+		},
+		$html,
+		2
+	);
+}
+
+/**
+ * Point "Start Planning" at a page instead of a mailto.
+ *
+ * The catering button opened the visitor's mail client on a Yahoo address,
+ * which the client reported as broken behaviour. Until the dedicated catering
+ * enquiry form exists it goes to the contact page. The email address printed
+ * elsewhere on the page stays a mailto, because there it is the content.
+ *
+ * @param string $html Complete page HTML.
+ * @return string
+ */
+function babayaga_child_fix_planning_cta( $html ) {
+	if ( false === strpos( $html, 'Start Planning' ) ) {
+		return $html;
+	}
+
+	$url = esc_url( home_url( '/contact-us/' ) );
+
+	return preg_replace_callback(
+		'#<a\b([^>]*)href="mailto:[^"]*"([^>]*)>((?:(?!</a>).)*Start Planning(?:(?!</a>).)*)</a>#is',
+		static function ( $m ) use ( $url ) {
+			return '<a' . $m[1] . 'href="' . $url . '"' . $m[2] . '>' . $m[3] . '</a>';
+		},
+		$html
+	);
+}
+
+/**
  * Apply both markup changes to the finished page.
  *
  * @param string $html Complete page HTML.
@@ -745,6 +839,8 @@ function babayaga_child_filter_output( $html ) {
 
 	$html = babayaga_child_rewrite_order_links( $html );
 	$html = babayaga_child_fix_external_links( $html );
+	$html = babayaga_child_update_hours( $html );
+	$html = babayaga_child_fix_planning_cta( $html );
 	$html = babayaga_child_inject_taste_band( $html );
 	$html = babayaga_child_swap_menu( $html );
 	$html = babayaga_child_dedupe_photos( $html, $base );

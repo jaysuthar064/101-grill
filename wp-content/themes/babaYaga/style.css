@@ -2267,3 +2267,35 @@ body .t101-taste figcaption {
   font-size: .78rem;
   color: var(--t101-body);
 }
+
+
+/* ==========================================================================
+   34. MENU PAGE WITHOUT PHOTOGRAPHY
+   --------------------------------------------------------------------------
+   The client asked for the dish photographs to come off the menu page. Each
+   section used to open with a photo strip carrying 40px of margin, so pulling
+   them left the heading sitting almost on top of the first card and the page
+   reading as one undifferentiated block of text.
+
+   No decoration is added to compensate. The rhythm is rebuilt from the two
+   things the page already has: space under each section heading, and the
+   group headings that chunk long sections. Prices get tabular figures so the
+   right-hand column lines up now that nothing else anchors the eye.
+   ========================================================================== */
+
+body .t101-menu .t101-sec-head {
+  margin-bottom: clamp(30px, 4vw, 52px);
+}
+
+/* A section that opens on a group heading already has that heading's own
+   top margin, so it does not need the full gap as well. */
+body .t101-menu .t101-sec-head + .t101-group-head { margin-top: 0; }
+
+body .t101-price {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Long sections read better with a little more air between the chunks now
+   that no photograph separates them. */
+body .t101-menu .t101-grid + .t101-group-head { margin-top: clamp(34px, 4.5vw, 52px); }
