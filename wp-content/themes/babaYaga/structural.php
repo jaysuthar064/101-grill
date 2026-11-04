@@ -847,6 +847,264 @@ function babayaga_child_inject_catering_form( $html ) {
 }
 
 /**
+ * Take the still photography off the site.
+ *
+ * The client's instruction on 2026-11-05: the dish shots read as social
+ * snaps rather than the professional photography they intend to commission,
+ * so all of it comes down until the new set exists.
+ *
+ * The whole Elementor image widget is removed, not just its <img>. Leaving
+ * the wrapper behind would leave its padding and its slot in the row, which
+ * reads as a hole in the page rather than as a page without photographs.
+ *
+ * Hero background images are deliberately NOT touched here - they are a CSS
+ * background behind white headline type, and removing them would leave white
+ * text on a white band.
+ *
+ * @param string $html Complete page HTML.
+ * @return string
+ */
+function babayaga_child_remove_dish_photos( $html ) {
+	if ( false === strpos( $html, '101-grill-' ) ) {
+		return $html;
+	}
+
+	$needle = 'elementor-widget-image';
+
+	while ( true ) {
+		// Find the next dish photograph.
+		if ( ! preg_match( '#<img\b[^>]*101-grill-(?!logo)[^>]*>#i', $html, $m, PREG_OFFSET_CAPTURE ) ) {
+			break;
+		}
+
+		$at = $m[0][1];
+
+		// Walk back to the image widget that owns it.
+		$start = strrpos( substr( $html, 0, $at ), '<div class="elementor-element' );
+
+		if ( false === $start || false === strpos( substr( $html, $start, $at - $start ), $needle ) ) {
+			// Not inside an image widget - drop just the tag so we cannot loop.
+			$html = substr_replace( $html, '', $at, strlen( $m[0][0] ) );
+
+			continue;
+		}
+
+		// Balanced end of that widget.
+		$depth = 0;
+		$end   = false;
+
+		if ( preg_match_all( '#<div\b|</div>#', $html, $tags, PREG_OFFSET_CAPTURE, $start ) ) {
+			foreach ( $tags[0] as $tag ) {
+				$depth += ( '</div>' === $tag[0] ) ? -1 : 1;
+
+				if ( 0 === $depth ) {
+					$end = $tag[1] + strlen( $tag[0] );
+
+					break;
+				}
+			}
+		}
+
+		if ( false === $end ) {
+			$html = substr_replace( $html, '', $at, strlen( $m[0][0] ) );
+
+			continue;
+		}
+
+		$html = substr_replace( $html, '', $start, $end - $start );
+	}
+
+	$html = babayaga_child_remove_galleries( $html );
+	$html = babayaga_child_remove_hollow_media_widgets( $html );
+
+	return babayaga_child_drop_empty_containers( $html );
+}
+
+/**
+ * Remove media widgets that no longer hold any media.
+ *
+ * Stripping the photographs out of a carousel leaves the carousel itself:
+ * a widget with no image, no text and no height, still holding its half of
+ * the row open. That is what kept the hole beside the homepage copy.
+ *
+ * Only media widget types are considered, so a spacer or divider - which is
+ * also legitimately empty - is never touched.
+ *
+ * @param string $html Complete page HTML.
+ * @return string
+ */
+function babayaga_child_remove_hollow_media_widgets( $html ) {
+	$types = array( 'elementor-widget-n-carousel', 'elementor-widget-image', 'elementor-widget-image-carousel', 'elementor-widget-image-box' );
+
+	foreach ( $types as $type ) {
+		$seek = 0;
+
+		while ( false !== ( $at = strpos( $html, $type, $seek ) ) ) {
+			$start = strrpos( substr( $html, 0, $at ), '<div class="elementor-element' );
+			$end   = false === $start ? false : babayaga_child_div_end( $html, $start );
+
+			if ( false === $start || false === $end ) {
+				$seek = $at + 1;
+
+				continue;
+			}
+
+			$inner = substr( $html, $start, $end - $start );
+
+			// Anything still carrying an image or real copy stays.
+			if ( preg_match( '#<(?:img|picture|source|svg|video|iframe)\b#i', $inner )
+				|| '' !== trim( html_entity_decode( wp_strip_all_tags( $inner ) ) ) ) {
+				$seek = $at + 1;
+
+				continue;
+			}
+
+			$html = substr_replace( $html, '', $start, $end - $start );
+			$seek = $start;
+		}
+	}
+
+	return $html;
+}
+
+/**
+ * Close of an element that starts at $start, balanced on div tags.
+ *
+ * @param string $html Markup.
+ * @param int    $start Offset of the opening <div.
+ * @return int|false Offset just past the matching </div>.
+ */
+function babayaga_child_div_end( $html, $start ) {
+	$depth = 0;
+
+	if ( ! preg_match_all( '#<div\b|</div>#', $html, $tags, PREG_OFFSET_CAPTURE, $start ) ) {
+		return false;
+	}
+
+	foreach ( $tags[0] as $tag ) {
+		$depth += ( '</div>' === $tag[0] ) ? -1 : 1;
+
+		if ( 0 === $depth ) {
+			return $tag[1] + strlen( $tag[0] );
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Remove photo galleries, section and heading together.
+ *
+ * The homepage gallery holds the informal phone shots the client called
+ * "social photos". Its heading sits beside it in the same section, so the
+ * whole section goes - a "See what's happening" heading over nothing would
+ * be worse than no section at all.
+ *
+ * @param string $html Complete page HTML.
+ * @return string
+ */
+function babayaga_child_remove_galleries( $html ) {
+	while ( false !== ( $at = strpos( $html, 'elementor-widget-gallery' ) ) ) {
+		// Walk out to the outermost section that owns this gallery.
+		$start = false;
+		$seek  = 0;
+
+		while ( true ) {
+			$next = strpos( $html, '<div class="elementor-element', $seek );
+
+			if ( false === $next || $next > $at ) {
+				break;
+			}
+
+			$tag = substr( $html, $next, 220 );
+
+			if ( false !== strpos( $tag, 'e-parent' ) ) {
+				$end = babayaga_child_div_end( $html, $next );
+
+				if ( false !== $end && $end > $at ) {
+					$start = $next;
+				}
+			}
+
+			$seek = $next + 1;
+		}
+
+		if ( false === $start ) {
+			// No owning section found; drop just the widget so we cannot loop.
+			$w = strrpos( substr( $html, 0, $at ), '<div class="elementor-element' );
+			$e = false === $w ? false : babayaga_child_div_end( $html, $w );
+
+			if ( false === $e ) {
+				return $html;
+			}
+
+			$html = substr_replace( $html, '', $w, $e - $w );
+
+			continue;
+		}
+
+		$end = babayaga_child_div_end( $html, $start );
+
+		if ( false === $end ) {
+			return $html;
+		}
+
+		$html = substr_replace( $html, '', $start, $end - $start );
+	}
+
+	return $html;
+}
+
+/**
+ * Drop containers left holding nothing.
+ *
+ * Removing a photograph from a two-column row leaves its column behind, and
+ * an empty column keeps its half of the row - which is why the copy ended up
+ * stranded in one half with a hole beside it. Anything with no widget and no
+ * text left in it is removed, repeatedly, so nested wrappers collapse too.
+ *
+ * @param string $html Complete page HTML.
+ * @return string
+ */
+function babayaga_child_drop_empty_containers( $html ) {
+	for ( $pass = 0; $pass < 4; $pass++ ) {
+		$removed = 0;
+		$seek    = 0;
+
+		while ( false !== ( $at = strpos( $html, '<div class="elementor-element', $seek ) ) ) {
+			$end = babayaga_child_div_end( $html, $at );
+
+			if ( false === $end ) {
+				break;
+			}
+
+			$inner = substr( $html, $at, $end - $at );
+
+			// Keep anything that still carries a widget, media or real text.
+			$has_widget = false !== strpos( $inner, 'elementor-widget' );
+			$has_media  = preg_match( '#<(?:img|iframe|video|svg|form|canvas)\b#i', $inner );
+			$text       = trim( html_entity_decode( wp_strip_all_tags( $inner ) ) );
+
+			if ( $has_widget || $has_media || '' !== $text ) {
+				$seek = $at + 1;
+
+				continue;
+			}
+
+			$html = substr_replace( $html, '', $at, $end - $at );
+			$removed++;
+			$seek = $at;
+		}
+
+		if ( ! $removed ) {
+			break;
+		}
+	}
+
+	return $html;
+}
+
+/**
  * Apply both markup changes to the finished page.
  *
  * @param string $html Complete page HTML.
@@ -872,13 +1130,13 @@ function babayaga_child_filter_output( $html ) {
 	$html = babayaga_child_fix_external_links( $html );
 	$html = babayaga_child_update_hours( $html );
 	$html = babayaga_child_fix_planning_cta( $html );
-	$html = babayaga_child_inject_taste_band( $html );
 	$html = babayaga_child_inject_catering_form( $html );
 	$html = babayaga_child_swap_menu( $html );
 	$html = babayaga_child_dedupe_photos( $html, $base );
 	$html = babayaga_child_add_srcset( $html, $base );
 
 	$html = babayaga_child_inject_menu_pdf( $html );
+	$html = babayaga_child_remove_dish_photos( $html );
 
 	if ( false === strpos( $html, 't101-hero-title' ) ) {
 		$html = preg_replace(

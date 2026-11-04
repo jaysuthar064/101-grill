@@ -2467,3 +2467,33 @@ body .t101-hp { position: absolute; left: -9999px; width: 1px; height: 1px; over
 @media (max-width: 640px) {
   body .t101-enquiry-form { grid-template-columns: 1fr; }
 }
+
+
+/* ==========================================================================
+   36. ROWS THAT LOST THEIR PHOTOGRAPH
+   --------------------------------------------------------------------------
+   The still photography has been taken off the site at the client's request.
+   Most of it sat in one half of a two-column row, and removing it leaves the
+   surviving column still sized to its half - copy stranded on one side with
+   an empty hole beside it.
+
+   Elementor sizes containers through a --width custom property, so that is
+   what has to change; setting width alone does nothing.
+   ========================================================================== */
+
+body .e-con > .e-con:only-child,
+body .e-con > .elementor-widget:only-child,
+body .e-con-inner > .e-con:only-child,
+body .e-con-inner > .elementor-widget:only-child {
+  --width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
+  flex-basis: 100% !important;
+}
+
+/* The divider that separated copy from photograph has nothing left to
+   separate. */
+body .e-con > .e-con:only-child {
+  border-left: 0 !important;
+  border-right: 0 !important;
+}
