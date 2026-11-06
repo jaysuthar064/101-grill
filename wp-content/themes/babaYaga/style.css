@@ -2500,29 +2500,32 @@ body .e-con > .e-con:only-child {
 
 
 /* ==========================================================================
-   37. EXPLORE STRIP
+   37. EXPLORE GRID
    --------------------------------------------------------------------------
-   The client's own professional photography, drifting slowly past. Not a
-   gallery and not a carousel - both were tried and rejected - so there is
-   nothing to click and no overlay. The motion exists so all nine are seen
-   without asking anything of the reader.
+   The client's own professional photography, nine shots three across.
+   Neither a carousel nor a hover-overlay gallery - both were tried and
+   rejected - so everything is visible at once and nothing is operated.
 
-   The spacing is margin on each figure rather than a flex gap, on purpose:
-   with gap, half the track is nine items plus eight and a half gaps and the
-   loop jumps at the seam. Folding the gap into each item makes 50% land
-   exactly on the start of the second copy.
+   The sources mix portrait and landscape, so the cells are square and the
+   images cover them: a ragged grid of mixed ratios reads as an accident.
+
+   The only motion is a short rise as each row arrives, staggered by index.
+   It marks where the reader is on the page; it is not decoration, and it
+   is gone entirely under prefers-reduced-motion.
    ========================================================================== */
 
 body .t101-explore {
-  padding: clamp(40px, 6vw, 76px) 0 clamp(44px, 6vw, 84px);
+  padding: clamp(44px, 6vw, 84px) 20px clamp(48px, 7vw, 92px);
   background: var(--t101-bg);
-  overflow: hidden;
+}
+
+body .t101-explore-inner {
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
 body .t101-explore-title {
-  margin: 0 auto clamp(26px, 4vw, 40px);
-  padding: 0 20px;
-  max-width: 1080px;
+  margin: 0 0 clamp(26px, 4vw, 42px);
   font-size: clamp(1.5rem, 3vw, 2.2rem);
   font-weight: 600;
   letter-spacing: -.03em;
@@ -2531,55 +2534,62 @@ body .t101-explore-title {
   text-align: center;
 }
 
-body .t101-explore-viewport { overflow: hidden; }
-
-body .t101-explore-track {
-  display: flex;
-  width: max-content;
-  animation: t101-drift 72s linear infinite;
+body .t101-explore-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(10px, 1.6vw, 20px);
 }
 
-/* The duplicate set becomes direct children of the track, so every item is
-   spaced identically and the seam is invisible. */
-body .t101-explore-copy { display: contents; }
-
-body .t101-explore-shot {
-  flex: none;
-  margin: 0 16px 0 0;
-}
-
-body .t101-explore-shot img {
-  display: block;
-  height: clamp(190px, 25vw, 300px);
-  width: auto;
-  object-fit: cover;
+body .t101-explore-item {
+  margin: 0;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
   border-radius: var(--t101-radius-sm);
   background: var(--t101-surface-2);
 }
 
-/* Let people stop it to look at something. */
-body .t101-explore-viewport:hover .t101-explore-track,
-body .t101-explore-viewport:focus-within .t101-explore-track {
-  animation-play-state: paused;
+body .t101-explore-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .6s var(--t101-ease);
 }
 
-/* Paused while scrolled out of view - see premium.js. */
-body .t101-explore.is-offscreen .t101-explore-track { animation-play-state: paused; }
+body .t101-explore-item:hover img { transform: scale(1.04); will-change: transform; }
 
-@keyframes t101-drift {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+/* Arrival.
+
+   The cells are visible by default and only hidden once premium.js has
+   armed the grid. Doing it the other way round means a script that fails
+   to run leaves nine invisible photographs on the page, which is a far
+   worse failure than losing an animation. */
+body .t101-explore-grid.is-armed .t101-explore-item {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .55s var(--t101-ease), transform .55s var(--t101-ease);
+  transition-delay: calc(var(--i, 0) * 55ms);
+}
+
+body .t101-explore-grid.is-armed .t101-explore-item.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 1000px) {
+  body .t101-explore-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  body .t101-explore-grid { gap: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body .t101-explore-track {
-    animation: none;
-    width: auto;
-    flex-wrap: wrap;
-    justify-content: center;
+  body .t101-explore-grid.is-armed .t101-explore-item {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
-  body .t101-explore-copy { display: none; }
-
-  body .t101-explore-shot { margin: 0 8px 8px 0; }
+  body .t101-explore-item:hover img { transform: none; }
 }

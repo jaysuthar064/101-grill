@@ -110,32 +110,57 @@
 	}
 
 	/* ------------------------------------------------------------------
-	 * 3. Explore strip
+	 * 3. Explore grid
 	 *
-	 * The strip animates continuously, so it is paused whenever it is off
-	 * screen. A transform animation is cheap, but there is no reason to
-	 * run one nobody can see.
+	 * Each cell rises as its row arrives. The delay comes from --i in the
+	 * markup, so the stagger is CSS and this only flips a class. If the
+	 * observer is unavailable the cells are revealed immediately rather
+	 * than left invisible.
 	 * ------------------------------------------------------------------ */
-	function initExploreStrip() {
-		var strip = document.querySelector( '.t101-explore' );
+	function initExploreGrid() {
+		var items = document.querySelectorAll( '.t101-explore-item' );
 
-		if ( ! strip || ! ( 'IntersectionObserver' in window ) ) {
+		if ( ! items.length ) {
 			return;
+		}
+
+		function showAll() {
+			Array.prototype.forEach.call( items, function ( el ) {
+				el.classList.add( 'is-in' );
+			} );
+		}
+
+		if ( reduceMotion || ! ( 'IntersectionObserver' in window ) ) {
+			showAll();
+
+			return;
+		}
+
+		// Only now hide them: if this script never ran, they stayed visible.
+		var grid = items[0].closest( '.t101-explore-grid' );
+
+		if ( grid ) {
+			grid.classList.add( 'is-armed' );
 		}
 
 		var observer = new IntersectionObserver( function ( entries ) {
 			entries.forEach( function ( entry ) {
-				strip.classList.toggle( 'is-offscreen', ! entry.isIntersecting );
+				if ( entry.isIntersecting ) {
+					entry.target.classList.add( 'is-in' );
+					observer.unobserve( entry.target );
+				}
 			} );
-		}, { rootMargin: '120px 0px' } );
+		}, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 } );
 
-		observer.observe( strip );
+		Array.prototype.forEach.call( items, function ( el ) {
+			observer.observe( el );
+		} );
 	}
 
 	function init() {
 		initScrollState();
 		initReveal();
-		initExploreStrip();
+		initExploreGrid();
 	}
 
 	if ( document.readyState === 'loading' ) {

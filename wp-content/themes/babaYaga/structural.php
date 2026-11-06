@@ -991,55 +991,51 @@ function babayaga_child_explore_shots() {
 }
 
 /**
- * A slow drift of the kitchen's own photography.
+ * The kitchen's own photography, as a grid.
  *
- * Deliberately not a gallery and not a carousel: both were tried and the
- * client did not want either. There is nothing to click, nothing to
- * operate and no overlay - the row simply moves, so all nine are seen
- * without asking anything of the reader. That is the whole justification
- * for the motion; it is not decoration.
+ * Nine shots, three across. Not a carousel and not a hover-overlay gallery:
+ * both of those have been tried and rejected. Everything is visible at once
+ * and nothing has to be operated.
  *
- * The set is rendered twice so the loop has no seam. The second copy is
- * hidden from assistive technology, or every dish would be announced
- * twice. Motion pauses on hover and on keyboard focus, and collapses to a
- * plain static grid under prefers-reduced-motion.
+ * The sources are a mix of portrait and landscape, so the cells are square
+ * and the images cover them. A ragged grid of mixed aspect ratios reads as
+ * an accident; a square one reads as a decision.
  *
  * @return string
  */
 function babayaga_child_explore_strip() {
 	$base  = get_stylesheet_directory_uri() . '/assets/img/explore/';
 	$dir   = get_stylesheet_directory() . '/assets/img/explore/';
-	$shots = babayaga_child_explore_shots();
-	$run   = '';
+	$items = '';
+	$i     = 0;
 
-	foreach ( $shots as $stem => $meta ) {
+	foreach ( babayaga_child_explore_shots() as $stem => $meta ) {
 		if ( ! file_exists( $dir . $stem . '.jpg' ) ) {
 			continue;
 		}
 
 		list( $w, $alt ) = $meta;
 
-		$run .= '<figure class="t101-explore-shot">';
-		$run .= '<img src="' . esc_url( $base . $stem . '.jpg' ) . '"';
-		$run .= ' srcset="' . esc_url( $base . $stem . '-380.jpg' ) . ' ' . (int) round( $w / 2 ) . 'w, ';
-		$run .= esc_url( $base . $stem . '.jpg' ) . ' ' . (int) $w . 'w"';
-		$run .= ' sizes="(max-width: 700px) 60vw, 26vw"';
-		$run .= ' width="' . (int) $w . '" height="760"';
-		$run .= ' alt="' . esc_attr( $alt ) . '" loading="lazy" decoding="async">';
-		$run .= '</figure>';
+		$items .= '<figure class="t101-explore-item" style="--i:' . (int) $i . '">';
+		$items .= '<img src="' . esc_url( $base . $stem . '.jpg' ) . '"';
+		$items .= ' srcset="' . esc_url( $base . $stem . '-380.jpg' ) . ' ' . (int) round( $w / 2 ) . 'w, ';
+		$items .= esc_url( $base . $stem . '.jpg' ) . ' ' . (int) $w . 'w"';
+		$items .= ' sizes="(max-width: 600px) 92vw, (max-width: 1000px) 46vw, 31vw"';
+		$items .= ' width="' . (int) $w . '" height="760"';
+		$items .= ' alt="' . esc_attr( $alt ) . '" loading="lazy" decoding="async">';
+		$items .= '</figure>';
+		$i++;
 	}
 
-	if ( '' === $run ) {
+	if ( '' === $items ) {
 		return '';
 	}
 
 	$html  = '<section class="t101-explore" aria-labelledby="t101-explore-title">';
+	$html .= '<div class="t101-explore-inner">';
 	$html .= '<h2 class="t101-explore-title" id="t101-explore-title">Straight from the kitchen</h2>';
-	$html .= '<div class="t101-explore-viewport">';
-	$html .= '<div class="t101-explore-track">';
-	$html .= $run;
-	$html .= '<span class="t101-explore-copy" aria-hidden="true">' . $run . '</span>';
-	$html .= '</div></div></section>';
+	$html .= '<div class="t101-explore-grid">' . $items . '</div>';
+	$html .= '</div></section>';
 
 	return $html;
 }
