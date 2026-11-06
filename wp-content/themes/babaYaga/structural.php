@@ -968,6 +968,135 @@ function babayaga_child_remove_hollow_media_widgets( $html ) {
 }
 
 /**
+ * The photographs for the Explore strip.
+ *
+ * The client's own professional set, supplied 2026-11-06. Widths are the
+ * real rendered widths at 760px tall, so each <img> can declare its own
+ * dimensions and the row cannot reflow as the photographs arrive.
+ *
+ * @return array file stem => array( width, alt )
+ */
+function babayaga_child_explore_shots() {
+	return array(
+		'breakfast-skillet'       => array( 1013, 'Breakfast skillet with eggs, peppers and toast' ),
+		'blackened-chicken-salad' => array( 570, 'Blackened chicken salad with corn and peppers' ),
+		'cajun-salmon-salad'      => array( 570, 'Cajun salmon over mixed greens with roasted peppers' ),
+		'tri-tip-plate'           => array( 570, 'Sliced tri-tip with BBQ beans and coleslaw' ),
+		'brisket-sandwich'        => array( 570, 'Smoked brisket sandwich on a brioche bun' ),
+		'on-the-smoker'           => array( 570, 'Racks of ribs and chicken on the smoker' ),
+		'cheeseburger'            => array( 570, 'Stacked cheeseburger with lettuce and tomato' ),
+		'baby-back-ribs'          => array( 428, 'Sliced rack of slow-smoked baby back ribs' ),
+		'burger-onion-rings'      => array( 1013, 'Burger served with onion rings' ),
+	);
+}
+
+/**
+ * A slow drift of the kitchen's own photography.
+ *
+ * Deliberately not a gallery and not a carousel: both were tried and the
+ * client did not want either. There is nothing to click, nothing to
+ * operate and no overlay - the row simply moves, so all nine are seen
+ * without asking anything of the reader. That is the whole justification
+ * for the motion; it is not decoration.
+ *
+ * The set is rendered twice so the loop has no seam. The second copy is
+ * hidden from assistive technology, or every dish would be announced
+ * twice. Motion pauses on hover and on keyboard focus, and collapses to a
+ * plain static grid under prefers-reduced-motion.
+ *
+ * @return string
+ */
+function babayaga_child_explore_strip() {
+	$base  = get_stylesheet_directory_uri() . '/assets/img/explore/';
+	$dir   = get_stylesheet_directory() . '/assets/img/explore/';
+	$shots = babayaga_child_explore_shots();
+	$run   = '';
+
+	foreach ( $shots as $stem => $meta ) {
+		if ( ! file_exists( $dir . $stem . '.jpg' ) ) {
+			continue;
+		}
+
+		list( $w, $alt ) = $meta;
+
+		$run .= '<figure class="t101-explore-shot">';
+		$run .= '<img src="' . esc_url( $base . $stem . '.jpg' ) . '"';
+		$run .= ' srcset="' . esc_url( $base . $stem . '-380.jpg' ) . ' ' . (int) round( $w / 2 ) . 'w, ';
+		$run .= esc_url( $base . $stem . '.jpg' ) . ' ' . (int) $w . 'w"';
+		$run .= ' sizes="(max-width: 700px) 60vw, 26vw"';
+		$run .= ' width="' . (int) $w . '" height="760"';
+		$run .= ' alt="' . esc_attr( $alt ) . '" loading="lazy" decoding="async">';
+		$run .= '</figure>';
+	}
+
+	if ( '' === $run ) {
+		return '';
+	}
+
+	$html  = '<section class="t101-explore" aria-labelledby="t101-explore-title">';
+	$html .= '<h2 class="t101-explore-title" id="t101-explore-title">Straight from the kitchen</h2>';
+	$html .= '<div class="t101-explore-viewport">';
+	$html .= '<div class="t101-explore-track">';
+	$html .= $run;
+	$html .= '<span class="t101-explore-copy" aria-hidden="true">' . $run . '</span>';
+	$html .= '</div></div></section>';
+
+	return $html;
+}
+
+/**
+ * Place the strip directly beneath the Explore 101 Grill invitation.
+ *
+ * @param string $html Complete page HTML.
+ * @return string
+ */
+function babayaga_child_inject_explore_strip( $html ) {
+	if ( ! is_front_page() || false !== strpos( $html, 't101-explore' ) ) {
+		return $html;
+	}
+
+	$at = stripos( $html, 'EXPLORE 101 GRILL' );
+
+	if ( false === $at ) {
+		return $html;
+	}
+
+	// Walk out to the section that holds the invitation.
+	$start = false;
+	$seek  = 0;
+
+	while ( true ) {
+		$next = strpos( $html, '<div class="elementor-element', $seek );
+
+		if ( false === $next || $next > $at ) {
+			break;
+		}
+
+		if ( false !== strpos( substr( $html, $next, 220 ), 'e-parent' ) ) {
+			$end = babayaga_child_div_end( $html, $next );
+
+			if ( false !== $end && $end > $at ) {
+				$start = $next;
+			}
+		}
+
+		$seek = $next + 1;
+	}
+
+	if ( false === $start ) {
+		return $html;
+	}
+
+	$end = babayaga_child_div_end( $html, $start );
+
+	if ( false === $end ) {
+		return $html;
+	}
+
+	return substr_replace( $html, babayaga_child_explore_strip(), $end, 0 );
+}
+
+/**
  * Close of an element that starts at $start, balanced on div tags.
  *
  * @param string $html Markup.
@@ -1137,6 +1266,7 @@ function babayaga_child_filter_output( $html ) {
 
 	$html = babayaga_child_inject_menu_pdf( $html );
 	$html = babayaga_child_remove_dish_photos( $html );
+	$html = babayaga_child_inject_explore_strip( $html );
 
 	if ( false === strpos( $html, 't101-hero-title' ) ) {
 		$html = preg_replace(

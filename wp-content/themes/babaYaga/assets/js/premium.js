@@ -109,9 +109,33 @@
 		} );
 	}
 
+	/* ------------------------------------------------------------------
+	 * 3. Explore strip
+	 *
+	 * The strip animates continuously, so it is paused whenever it is off
+	 * screen. A transform animation is cheap, but there is no reason to
+	 * run one nobody can see.
+	 * ------------------------------------------------------------------ */
+	function initExploreStrip() {
+		var strip = document.querySelector( '.t101-explore' );
+
+		if ( ! strip || ! ( 'IntersectionObserver' in window ) ) {
+			return;
+		}
+
+		var observer = new IntersectionObserver( function ( entries ) {
+			entries.forEach( function ( entry ) {
+				strip.classList.toggle( 'is-offscreen', ! entry.isIntersecting );
+			} );
+		}, { rootMargin: '120px 0px' } );
+
+		observer.observe( strip );
+	}
+
 	function init() {
 		initScrollState();
 		initReveal();
+		initExploreStrip();
 	}
 
 	if ( document.readyState === 'loading' ) {

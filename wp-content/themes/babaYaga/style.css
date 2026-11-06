@@ -2497,3 +2497,89 @@ body .e-con > .e-con:only-child {
   border-left: 0 !important;
   border-right: 0 !important;
 }
+
+
+/* ==========================================================================
+   37. EXPLORE STRIP
+   --------------------------------------------------------------------------
+   The client's own professional photography, drifting slowly past. Not a
+   gallery and not a carousel - both were tried and rejected - so there is
+   nothing to click and no overlay. The motion exists so all nine are seen
+   without asking anything of the reader.
+
+   The spacing is margin on each figure rather than a flex gap, on purpose:
+   with gap, half the track is nine items plus eight and a half gaps and the
+   loop jumps at the seam. Folding the gap into each item makes 50% land
+   exactly on the start of the second copy.
+   ========================================================================== */
+
+body .t101-explore {
+  padding: clamp(40px, 6vw, 76px) 0 clamp(44px, 6vw, 84px);
+  background: var(--t101-bg);
+  overflow: hidden;
+}
+
+body .t101-explore-title {
+  margin: 0 auto clamp(26px, 4vw, 40px);
+  padding: 0 20px;
+  max-width: 1080px;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 600;
+  letter-spacing: -.03em;
+  line-height: 1.15;
+  color: var(--t101-ink);
+  text-align: center;
+}
+
+body .t101-explore-viewport { overflow: hidden; }
+
+body .t101-explore-track {
+  display: flex;
+  width: max-content;
+  animation: t101-drift 72s linear infinite;
+}
+
+/* The duplicate set becomes direct children of the track, so every item is
+   spaced identically and the seam is invisible. */
+body .t101-explore-copy { display: contents; }
+
+body .t101-explore-shot {
+  flex: none;
+  margin: 0 16px 0 0;
+}
+
+body .t101-explore-shot img {
+  display: block;
+  height: clamp(190px, 25vw, 300px);
+  width: auto;
+  object-fit: cover;
+  border-radius: var(--t101-radius-sm);
+  background: var(--t101-surface-2);
+}
+
+/* Let people stop it to look at something. */
+body .t101-explore-viewport:hover .t101-explore-track,
+body .t101-explore-viewport:focus-within .t101-explore-track {
+  animation-play-state: paused;
+}
+
+/* Paused while scrolled out of view - see premium.js. */
+body .t101-explore.is-offscreen .t101-explore-track { animation-play-state: paused; }
+
+@keyframes t101-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .t101-explore-track {
+    animation: none;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  body .t101-explore-copy { display: none; }
+
+  body .t101-explore-shot { margin: 0 8px 8px 0; }
+}
