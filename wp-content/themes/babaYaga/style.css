@@ -2473,12 +2473,18 @@ body .t101-hp { position: absolute; left: -9999px; width: 1px; height: 1px; over
    36. ROWS THAT LOST THEIR PHOTOGRAPH
    --------------------------------------------------------------------------
    The still photography has been taken off the site at the client's request.
-   Most of it sat in one half of a two-column row, and removing it leaves the
-   surviving column still sized to its half - copy stranded on one side with
+   Most of it sat in one half of a two-column row, and removing it left the
+   surviving column still sized to its half: copy stranded on one side with
    an empty hole beside it.
 
    Elementor sizes containers through a --width custom property, so that is
    what has to change; setting width alone does nothing.
+
+   Releasing the width is only half of it. Left at full width the copy ran
+   the whole 1500px, roughly 185 characters a line against a readable
+   maximum of 60 to 75. These blocks were designed to sit in half a row, so
+   they keep that measure and stay left aligned - the row is full width,
+   the reading is not.
    ========================================================================== */
 
 body .e-con > .e-con:only-child,
@@ -2486,9 +2492,18 @@ body .e-con > .elementor-widget:only-child,
 body .e-con-inner > .e-con:only-child,
 body .e-con-inner > .elementor-widget:only-child {
   --width: 100%;
-  width: 100% !important;
-  max-width: 100% !important;
-  flex-basis: 100% !important;
+  flex-basis: auto !important;
+}
+
+/* The menu card is a laid-out component rather than prose, so it is not
+   capped and keeps the full row. */
+body .e-con > .e-con:only-child:not(:has(.t101-menu)),
+body .e-con-inner > .e-con:only-child:not(:has(.t101-menu)) {
+  max-width: 820px;
+  /* Some of these rows had the photograph on the left and justified their
+     content to the end. With the photograph gone that reads as a block
+     drifting to the right for no reason, so they all settle left. */
+  margin-inline-end: auto;
 }
 
 /* The divider that separated copy from photograph has nothing left to
@@ -2542,10 +2557,23 @@ body .t101-explore-grid {
 
 body .t101-explore-item {
   margin: 0;
-  aspect-ratio: 1 / 1;
   overflow: hidden;
   border-radius: var(--t101-radius-sm);
   background: var(--t101-surface-2);
+}
+
+/* Two grids on one page should not read as the same block twice. The upper
+   one squares a mixed set of sources; the lower one is six 4:5 frames and
+   keeps that ratio, on a different ground. */
+body .t101-explore--square .t101-explore-item { aspect-ratio: 1 / 1; }
+body .t101-explore--portrait .t101-explore-item { aspect-ratio: 4 / 5; }
+
+body .t101-explore--portrait {
+  background: var(--t101-surface-2);
+}
+
+body .t101-explore--portrait .t101-explore-item {
+  background: var(--t101-surface);
 }
 
 body .t101-explore-item img {

@@ -991,25 +991,45 @@ function babayaga_child_explore_shots() {
 }
 
 /**
- * The kitchen's own photography, as a grid.
+ * The venue and service shots for the lower grid.
  *
- * Nine shots, three across. Not a carousel and not a hover-overlay gallery:
- * both of those have been tried and rejected. Everything is visible at once
- * and nothing has to be operated.
+ * Supplied 2026-11-07. All six are 4:5, so this grid keeps that ratio
+ * rather than cropping square like the Explore grid above - two photo
+ * grids on one page should not look like the same block twice.
  *
- * The sources are a mix of portrait and landscape, so the cells are square
- * and the images cover them. A ragged grid of mixed aspect ratios reads as
- * an accident; a square one reads as a decision.
+ * @return array file stem => array( width, alt )
+ */
+function babayaga_child_happening_shots() {
+	return array(
+		'turkey-club'        => array( 608, 'Turkey club sandwich cut into quarters' ),
+		'ribs-plate'         => array( 608, 'Ribs plate with cornbread, BBQ beans and coleslaw' ),
+		'ribs-plate-patio'   => array( 608, 'Ribs and sides served on the patio' ),
+		'smoker-racks'       => array( 608, 'Racks of ribs and chicken in the smoker' ),
+		'chopped-salad-bowl' => array( 608, 'Chopped salad being tossed in the kitchen' ),
+		'street-tacos'       => array( 608, 'Street tacos with lime and salsa' ),
+	);
+}
+
+/**
+ * One photography grid.
  *
+ * Shared by both grids so they cannot drift apart. Neither is a carousel
+ * and neither has a hover overlay: both of those were tried and rejected.
+ * Everything is visible at once and nothing has to be operated.
+ *
+ * @param string $id    Section id, also the folder under assets/img.
+ * @param string $title Heading.
+ * @param array  $shots Stem => array( width, alt ).
+ * @param string $ratio Modifier class controlling the cell aspect.
  * @return string
  */
-function babayaga_child_explore_strip() {
-	$base  = get_stylesheet_directory_uri() . '/assets/img/explore/';
-	$dir   = get_stylesheet_directory() . '/assets/img/explore/';
+function babayaga_child_photo_grid( $id, $title, $shots, $ratio ) {
+	$base  = get_stylesheet_directory_uri() . '/assets/img/' . $id . '/';
+	$dir   = get_stylesheet_directory() . '/assets/img/' . $id . '/';
 	$items = '';
 	$i     = 0;
 
-	foreach ( babayaga_child_explore_shots() as $stem => $meta ) {
+	foreach ( $shots as $stem => $meta ) {
 		if ( ! file_exists( $dir . $stem . '.jpg' ) ) {
 			continue;
 		}
@@ -1031,13 +1051,44 @@ function babayaga_child_explore_strip() {
 		return '';
 	}
 
-	$html  = '<section class="t101-explore" aria-labelledby="t101-explore-title">';
+	$title_id = 't101-' . $id . '-title';
+
+	$html  = '<section class="t101-explore t101-explore--' . esc_attr( $ratio ) . '" aria-labelledby="' . esc_attr( $title_id ) . '">';
 	$html .= '<div class="t101-explore-inner">';
-	$html .= '<h2 class="t101-explore-title" id="t101-explore-title">Straight from the kitchen</h2>';
+	$html .= '<h2 class="t101-explore-title" id="' . esc_attr( $title_id ) . '">' . esc_html( $title ) . '</h2>';
 	$html .= '<div class="t101-explore-grid">' . $items . '</div>';
 	$html .= '</div></section>';
 
 	return $html;
+}
+
+/**
+ * The upper grid, under the Explore invitation.
+ *
+ * @return string
+ */
+function babayaga_child_explore_strip() {
+	return babayaga_child_photo_grid( 'explore', 'Straight from the kitchen', babayaga_child_explore_shots(), 'square' );
+}
+
+/**
+ * The lower grid, before the footer.
+ *
+ * @param string $html Complete page HTML.
+ * @return string
+ */
+function babayaga_child_inject_happening( $html ) {
+	if ( ! is_front_page() || false !== strpos( $html, 't101-happening-title' ) || false === strpos( $html, '</main>' ) ) {
+		return $html;
+	}
+
+	$grid = babayaga_child_photo_grid( 'happening', 'See what&rsquo;s happening', babayaga_child_happening_shots(), 'portrait' );
+
+	if ( '' === $grid ) {
+		return $html;
+	}
+
+	return substr_replace( $html, $grid, strrpos( $html, '</main>' ), 0 );
 }
 
 /**
@@ -1263,6 +1314,7 @@ function babayaga_child_filter_output( $html ) {
 	$html = babayaga_child_inject_menu_pdf( $html );
 	$html = babayaga_child_remove_dish_photos( $html );
 	$html = babayaga_child_inject_explore_strip( $html );
+	$html = babayaga_child_inject_happening( $html );
 
 	if ( false === strpos( $html, 't101-hero-title' ) ) {
 		$html = preg_replace(
