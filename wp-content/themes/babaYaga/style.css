@@ -2472,43 +2472,33 @@ body .t101-hp { position: absolute; left: -9999px; width: 1px; height: 1px; over
 /* ==========================================================================
    36. ROWS THAT LOST THEIR PHOTOGRAPH
    --------------------------------------------------------------------------
-   The still photography has been taken off the site at the client's request.
-   Most of it sat in one half of a two-column row, and removing it left the
-   surviving column still sized to its half: copy stranded on one side with
-   an empty hole beside it.
+   Most of the removed photography sat in one half of a two-column row.
+   The surviving column is tagged t101-solo in structural.php, and its row
+   t101-solo-row.
 
-   Elementor sizes containers through a --width custom property, so that is
-   what has to change; setting width alone does nothing.
+   This was first written with :only-child and :not(:has(...)). It rendered
+   correctly in local Chrome and not on the live site, where the copy ran the
+   full viewport width with no inset at all. Plain classes match everywhere,
+   so the selector support question does not arise.
 
-   Releasing the width is only half of it. Left at full width the copy ran
-   the whole 1500px, roughly 185 characters a line against a readable
-   maximum of 60 to 75. These blocks were designed to sit in half a row, so
-   they keep that measure and stay left aligned - the row is full width,
-   the reading is not.
+   The row sets its own horizontal padding rather than relying on whatever
+   Elementor left behind, which is why the live page had text flush against
+   the window edge.
    ========================================================================== */
 
-body .e-con > .e-con:only-child,
-body .e-con > .elementor-widget:only-child,
-body .e-con-inner > .e-con:only-child,
-body .e-con-inner > .elementor-widget:only-child {
+body .t101-solo-row {
+  --padding-left: clamp(20px, 4vw, 48px);
+  --padding-right: clamp(20px, 4vw, 48px);
+}
+
+body .t101-solo {
   --width: 100%;
   flex-basis: auto !important;
-}
-
-/* The menu card is a laid-out component rather than prose, so it is not
-   capped and keeps the full row. */
-body .e-con > .e-con:only-child:not(:has(.t101-menu)),
-body .e-con-inner > .e-con:only-child:not(:has(.t101-menu)) {
+  /* These blocks were drawn to sit in half a row. At full width the copy
+     runs about 185 characters a line against a readable 60 to 75, so they
+     keep their measure and stay left. */
   max-width: 820px;
-  /* Some of these rows had the photograph on the left and justified their
-     content to the end. With the photograph gone that reads as a block
-     drifting to the right for no reason, so they all settle left. */
   margin-inline-end: auto;
-}
-
-/* The divider that separated copy from photograph has nothing left to
-   separate. */
-body .e-con > .e-con:only-child {
   border-left: 0 !important;
   border-right: 0 !important;
 }

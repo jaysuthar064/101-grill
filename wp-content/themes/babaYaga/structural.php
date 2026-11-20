@@ -1144,6 +1144,75 @@ function babayaga_child_inject_explore_strip( $html ) {
 }
 
 /**
+ * Tag rows that ended up holding a single column.
+ *
+ * This was done in CSS with :only-child and :not(:has(...)). It worked
+ * locally and did not on the live site, so the layout shipped with the copy
+ * running the full viewport width. Rather than keep guessing at selector
+ * support across environments, the marking is done here, where the markup is
+ * already being rewritten: a plain class matches everywhere.
+ *
+ * @param string $html Complete page HTML.
+ * @return string
+ */
+function babayaga_child_mark_solo_rows( $html ) {
+	$seek = 0;
+
+	while ( false !== ( $at = strpos( $html, '<div class="elementor-element', $seek ) ) ) {
+		$tag_end = strpos( $html, '>', $at );
+		$tag     = false === $tag_end ? '' : substr( $html, $at, $tag_end - $at );
+
+		if ( false === strpos( $tag, 'e-parent' ) ) {
+			$seek = $at + 1;
+
+			continue;
+		}
+
+		$end = babayaga_child_div_end( $html, $at );
+
+		if ( false === $end ) {
+			$seek = $at + 1;
+
+			continue;
+		}
+
+		$block = substr( $html, $at, $end - $at );
+		$inner = substr( $block, strpos( $block, '>' ) + 1 );
+		$inner = substr( $inner, 0, strrpos( $inner, '</div>' ) );
+
+		// Direct children only.
+		$depth = 0;
+		$kids  = array();
+
+		foreach ( preg_split( '#(<div\b[^>]*>|</div>)#', $inner, -1, PREG_SPLIT_DELIM_CAPTURE ) as $piece ) {
+			if ( '</div>' === $piece ) {
+				$depth--;
+			} elseif ( 0 === strpos( $piece, '<div' ) ) {
+				if ( 0 === $depth ) {
+					$kids[] = $piece;
+				}
+
+				$depth++;
+			}
+		}
+
+		// One column left, and not the menu card, which is not prose.
+		if ( 1 === count( $kids ) && false !== strpos( $kids[0], 'e-con' ) && false === strpos( $block, 't101-menu' ) ) {
+			$child = $kids[0];
+			$block = str_replace( $child, str_replace( 'elementor-element ', 'elementor-element t101-solo ', $child ), $block );
+			$block = preg_replace( '#^<div class="elementor-element #', '<div class="elementor-element t101-solo-row ', $block, 1 );
+
+			$html = substr_replace( $html, $block, $at, $end - $at );
+			$end  = $at + strlen( $block );
+		}
+
+		$seek = $end;
+	}
+
+	return $html;
+}
+
+/**
  * Close of an element that starts at $start, balanced on div tags.
  *
  * @param string $html Markup.
@@ -1313,6 +1382,7 @@ function babayaga_child_filter_output( $html ) {
 
 	$html = babayaga_child_inject_menu_pdf( $html );
 	$html = babayaga_child_remove_dish_photos( $html );
+	$html = babayaga_child_mark_solo_rows( $html );
 	$html = babayaga_child_inject_explore_strip( $html );
 	$html = babayaga_child_inject_happening( $html );
 
