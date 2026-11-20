@@ -2491,6 +2491,43 @@ body .t101-solo-row {
   --padding-right: clamp(20px, 4vw, 48px);
 }
 
+/* A row that got its photograph back becomes two columns again. The copy
+   keeps a readable measure and the picture takes the space the removal had
+   left empty. Both wrap to full width on a narrow screen. */
+body .t101-paired-row > .e-con-inner,
+body .t101-paired-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(24px, 4vw, 56px);
+}
+
+body .t101-paired-row > .t101-solo,
+body .t101-paired-row .e-con-inner > .t101-solo {
+  flex: 1 1 400px;
+  max-width: 620px;
+}
+
+body .t101-pair-media {
+  flex: 1 1 360px;
+  margin: 0;
+  min-width: 0;
+}
+
+body .t101-pair-media img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--t101-radius-sm);
+  background: var(--t101-surface-2);
+}
+
+@media (max-width: 780px) {
+  body .t101-paired-row > .t101-solo,
+  body .t101-paired-row .e-con-inner > .t101-solo { max-width: 100%; }
+}
+
 body .t101-solo {
   --width: 100%;
   flex-basis: auto !important;

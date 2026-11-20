@@ -981,12 +981,9 @@ function babayaga_child_explore_shots() {
 		'breakfast-skillet'       => array( 1013, 'Breakfast skillet with eggs, peppers and toast' ),
 		'blackened-chicken-salad' => array( 570, 'Blackened chicken salad with corn and peppers' ),
 		'cajun-salmon-salad'      => array( 570, 'Cajun salmon over mixed greens with roasted peppers' ),
-		'tri-tip-plate'           => array( 570, 'Sliced tri-tip with BBQ beans and coleslaw' ),
 		'brisket-sandwich'        => array( 570, 'Smoked brisket sandwich on a brioche bun' ),
 		'on-the-smoker'           => array( 570, 'Racks of ribs and chicken on the smoker' ),
 		'cheeseburger'            => array( 570, 'Stacked cheeseburger with lettuce and tomato' ),
-		'baby-back-ribs'          => array( 428, 'Sliced rack of slow-smoked baby back ribs' ),
-		'burger-onion-rings'      => array( 1013, 'Burger served with onion rings' ),
 	);
 }
 
@@ -1144,6 +1141,63 @@ function babayaga_child_inject_explore_strip( $html ) {
 }
 
 /**
+ * A photograph for each row the removal left half empty.
+ *
+ * Keyed on the heading, because that is the only stable handle on an
+ * Elementor row. Each page uses photographs that appear nowhere else on
+ * that page: the three used here on the homepage were taken out of the
+ * Explore grid above rather than repeated into it.
+ *
+ * @return array heading fragment => array( folder, stem, width, alt )
+ */
+function babayaga_child_row_media() {
+	return array(
+		'WHERE GOOD TIMES'      => array( 'explore', 'burger-onion-rings', 1013, 'Burger served with onion rings' ),
+		'Hosting Something'     => array( 'explore', 'tri-tip-plate', 570, 'Sliced tri-tip with BBQ beans and coleslaw' ),
+		'HOST YOUR HOEDOWN'     => array( 'explore', 'baby-back-ribs', 428, 'Sliced rack of slow-smoked baby back ribs' ),
+		'AN UNSURPASSED'        => array( 'happening', 'turkey-club', 608, 'Turkey club sandwich cut into quarters' ),
+		'DELICIOUS BBQ FOOD'    => array( 'happening', 'ribs-plate', 608, 'Ribs plate with cornbread, BBQ beans and coleslaw' ),
+		'QUALITY BBQ CATERING'  => array( 'happening', 'ribs-plate-patio', 608, 'Ribs and sides served on the patio' ),
+		'SIT BACK, ENJOY'       => array( 'happening', 'smoker-racks', 608, 'Racks of ribs and chicken in the smoker' ),
+	);
+}
+
+/**
+ * Build the media column for a row, or '' if there is nothing for it.
+ *
+ * @param string $block The row's markup.
+ * @return string
+ */
+function babayaga_child_row_media_markup( $block ) {
+	foreach ( babayaga_child_row_media() as $needle => $shot ) {
+		if ( false === strpos( $block, $needle ) ) {
+			continue;
+		}
+
+		list( $folder, $stem, $w, $alt ) = $shot;
+		$dir = get_stylesheet_directory() . '/assets/img/' . $folder . '/';
+
+		if ( ! file_exists( $dir . $stem . '.jpg' ) ) {
+			return '';
+		}
+
+		$base = get_stylesheet_directory_uri() . '/assets/img/' . $folder . '/';
+
+		$out  = '<figure class="t101-pair-media">';
+		$out .= '<img src="' . esc_url( $base . $stem . '.jpg' ) . '"';
+		$out .= ' srcset="' . esc_url( $base . $stem . '-380.jpg' ) . ' ' . (int) round( $w / 2 ) . 'w, ';
+		$out .= esc_url( $base . $stem . '.jpg' ) . ' ' . (int) $w . 'w"';
+		$out .= ' sizes="(max-width: 780px) 92vw, 40vw"';
+		$out .= ' width="' . (int) $w . '" height="760"';
+		$out .= ' alt="' . esc_attr( $alt ) . '" loading="lazy" decoding="async">';
+
+		return $out . '</figure>';
+	}
+
+	return '';
+}
+
+/**
  * Tag rows that ended up holding a single column.
  *
  * This was done in CSS with :only-child and :not(:has(...)). It worked
@@ -1201,6 +1255,17 @@ function babayaga_child_mark_solo_rows( $html ) {
 			$child = $kids[0];
 			$block = str_replace( $child, str_replace( 'elementor-element ', 'elementor-element t101-solo ', $child ), $block );
 			$block = preg_replace( '#^<div class="elementor-element #', '<div class="elementor-element t101-solo-row ', $block, 1 );
+
+			// A hero row carries the page title over its own background
+			// photograph and must not gain a second one beside it.
+			if ( false === stripos( $block, '<h1' ) ) {
+				$media = babayaga_child_row_media_markup( $block );
+
+				if ( '' !== $media ) {
+					$block = preg_replace( '#</div>$#', $media . '</div>', $block, 1 );
+					$block = str_replace( 't101-solo-row ', 't101-solo-row t101-paired-row ', $block );
+				}
+			}
 
 			$html = substr_replace( $html, $block, $at, $end - $at );
 			$end  = $at + strlen( $block );
